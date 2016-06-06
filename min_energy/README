@@ -1,0 +1,3 @@
+These scripts take an HFODD stdout file and use it to [approximately] construct 1D cuts of the potential energyy surface. I say approximately because the curve suggested by these plots may not be continuous on the actual PES.
+
+These scripts need to be consolidated and upgraded. Right now they kind of get the job done but there's a lot of room for improvement.
