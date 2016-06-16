@@ -1,0 +1,187 @@
+<root>
+  <PES name="the big test">
+    <Global>
+      <nucleus Z=" 94" N=" 146"/>
+      <force name="SKM*"/>
+      <temperature T=" 0.000"/>
+      <pairingForceN V0=" -265.250" V1="  828.906" rho="    0.320" alpha="    1.000"/>
+      <pairingForceP V0=" -340.062" V1=" 1062.695" rho="    0.320" alpha="    1.000"/>
+      <pairingCutoff Ecut="  60.000"/>
+      <comment>Blabla</comment>
+    </Global>
+    <point id="0">
+      <neighborsID> 0 1 2 3</neighborsID>
+      <stability dE="-4.420000e-07 MeV"/>
+      <fichier nom="hfodd_000001.out" dir="/p/lscratchd/schunck1/pu240_mesh2D_q20q30_NEWinertia_borderNorth1_SKMS_T0.00"/>
+      <basis beta2=" 0.112" omega=" 8.1464" FCHOM0=" 1.2348">
+        <HOfrequencies omega_x=" 8.4392" omega_y=" 8.4392" omega_z=" 7.5909"/>
+        <number_of_shells Nx=" 16" Ny=" 16" Nz=" 18"/>
+        <Gauss_Hermite Ng_x=" 40" Ng_y=" 40" Ng_z=" 66"/>
+        <number_of_states LDBASE="  1110"/>
+      </basis>
+      <constraints>
+        <constraint type="q20" val="  5.000000 b"/>
+        <constraint type="q22" val="  0.000000 b"/>
+        <constraint type="q30" val=" 76.000000 b^3/2"/>
+        <constraint type="q40" val=" 37.771600 b^2"/>
+        <constraint type="q50" val="  3.404300 b^5/2"/>
+        <constraint type="q60" val=" 46.561500 b^3"/>
+        <constraint type="q70" val=" 32.059100 b^7/2"/>
+        <constraint type="q80" val=" -6.580700 b^4"/>
+        <constraint type="D" val=" 12.8590 fm"/>
+        <constraint type="xi" val=" -0.542748"/>
+      </constraints>
+      <energies EHFB=" -1543.503261 MeV"/>
+      <corrections>
+        <goaZpe inertiaType="ATDHF" value="   0.956 MeV"/>
+        <goaZpe inertiaType="GCM" value="   1.184 MeV"/>
+      </corrections>
+      <pairing deltaN=" 8.184e-01 MeV" deltaP=" 8.434e-01 MeV" EpairN="-1.256e+01 MeV" EpairP="-8.997e+00 MeV"/>
+      <Fermi lambdaN="-7.190e+00 MeV" lambdaP="-9.260e+00 MeV"/>
+      <temperature T="  0.000000 MeV" S="  0.000000 MeV">
+        <dispersion_N quantum="   4.874" statistical="   0.000"/>
+        <dispersion_Q l="1" m="0" quantum="  10.631" statistical="     0.0"/>
+        <dispersion_Q l="2" m="0" quantum="  46.259" statistical="     0.0"/>
+        <dispersion_Q l="3" m="0" quantum="   7.685" statistical="     0.0"/>
+      </temperature>
+      <neck zN="  1.6145 fm" D=" 12.8590 fm" qN="  0.1350" Nz="  0.0178"/>
+      <fragments>
+        <identity Z1=" 72.3135" A1=" 185.1298" Z2=" 21.6865" A2=" 54.8702"/>
+        <interaction Enuc="   -7.301 MeV" ECou="  146.409 MeV" ECouDir_exact="   0.0000 MeV" ECouExc_exact="   0.0000 MeV"/>
+        <deformation1 q20_1="-131.7609 b" q22_1="  -0.0000 b" q30_1="  -0.1867 b^3/2" q40_1="  28.5903 b^2" q50_1="   0.6603 b^5/2" q60_1=" -18.3157 b^3" q70_1="  -1.4432 b^7/2" q80_1="  10.5725 b^4"/>
+        <deformation2 q20_2="  -3.2085 b" q22_2="   0.0000 b" q30_2="  -0.0750 b^3/2" q40_2="   0.0712 b^2" q50_2="   0.0165 b^5/2" q60_2="   0.0153 b^3" q70_2="  -0.0121 b^7/2" q80_2="  -0.0263 b^4"/>
+        <properties1 Ekin_1=" 3166.962 MeV" Enuc_1="-4863.276 MeV" Epair_1="  -14.124 MeV" ECouD_1="  472.680 MeV" ECouE_1="  -25.929 MeV" ECM_1="   -5.800 MeV"/>
+        <properties2 Ekin_2="  994.250 MeV" Enuc_2="-1504.234 MeV" Epair_2="   -5.988 MeV" ECouD_2="   88.388 MeV" ECouE_2="   -8.076 MeV" ECM_2="   -1.797 MeV"/>
+      </fragments>
+      <inertia size="3">
+        <element i="q30" j="q30" value="0.1369 MeV-1.b-3" type="ATDHF"/>
+        <element i="q30" j="q20" value="-0.03377 MeV-1.b-5/2" type="ATDHF"/>
+        <element i="q20" j="q20" value="0.01785 MeV-1.b-2" type="ATDHF"/>
+        <element i="q30" j="q30" value="0.1055 MeV-1.b-3" type="GCM"/>
+        <element i="q30" j="q20" value="-0.0268 MeV-1.b-5/2" type="GCM"/>
+        <element i="q20" j="q20" value="0.01487 MeV-1.b-2" type="GCM"/>
+      </inertia>
+      <metric size="3">
+        <element i="q30" j="q30" value="0.1213 b-3" type="G"/>
+        <element i="q30" j="q20" value="-0.02735 b-5/2" type="G"/>
+        <element i="q20" j="q20" value="0.01589 b-2" type="G"/>
+      </metric>
+    </point>
+    <point id="1">
+      <neighborsID> 0 1 2 3</neighborsID>
+      <stability dE="-1.780000e-08 MeV"/>
+      <fichier nom="hfodd_000002.out" dir="/p/lscratchd/schunck1/pu240_mesh2D_q20q30_NEWinertia_borderNorth1_SKMS_T0.00"/>
+      <basis beta2=" 0.158" omega=" 8.1464" FCHOM0=" 1.2348">
+        <HOfrequencies omega_x=" 8.5630" omega_y=" 8.5630" omega_z=" 7.3731"/>
+        <number_of_shells Nx=" 16" Ny=" 16" Nz=" 19"/>
+        <Gauss_Hermite Ng_x=" 40" Ng_y=" 40" Ng_z=" 66"/>
+        <number_of_states LDBASE="  1103"/>
+      </basis>
+      <constraints>
+        <constraint type="q20" val=" 10.000000 b"/>
+        <constraint type="q22" val="  0.000000 b"/>
+        <constraint type="q30" val=" 76.000000 b^3/2"/>
+        <constraint type="q40" val=" 42.576800 b^2"/>
+        <constraint type="q50" val=" 13.239800 b^5/2"/>
+        <constraint type="q60" val=" 53.321400 b^3"/>
+        <constraint type="q70" val=" 42.638500 b^7/2"/>
+        <constraint type="q80" val=" 10.303000 b^4"/>
+        <constraint type="D" val=" 13.0736 fm"/>
+        <constraint type="xi" val=" -0.562408"/>
+      </constraints>
+      <energies EHFB=" -1556.037242 MeV"/>
+      <corrections>
+        <goaZpe inertiaType="ATDHF" value="   0.888 MeV"/>
+        <goaZpe inertiaType="GCM" value="   1.178 MeV"/>
+      </corrections>
+      <pairing deltaN=" 7.432e-01 MeV" deltaP=" 7.208e-01 MeV" EpairN="-1.035e+01 MeV" EpairP="-6.903e+00 MeV"/>
+      <Fermi lambdaN="-7.163e+00 MeV" lambdaP="-8.972e+00 MeV"/>
+      <temperature T="  0.000000 MeV" S="  0.000000 MeV">
+        <dispersion_N quantum="   3.846" statistical="   0.000"/>
+        <dispersion_Q l="1" m="0" quantum="   9.360" statistical="     0.0"/>
+        <dispersion_Q l="2" m="0" quantum="  42.849" statistical="     0.0"/>
+        <dispersion_Q l="3" m="0" quantum="   7.568" statistical="     0.0"/>
+      </temperature>
+      <neck zN="  1.6762 fm" D=" 13.0736 fm" qN="  0.1204" Nz="  0.0172"/>
+      <fragments>
+        <identity Z1=" 72.9162" A1=" 187.4889" Z2=" 21.0838" A2=" 52.5111"/>
+        <interaction Enuc="   -2.756 MeV" ECou="  143.007 MeV" ECouDir_exact="   0.0000 MeV" ECouExc_exact="   0.0000 MeV"/>
+        <deformation1 q20_1="-127.5721 b" q22_1="   0.0000 b" q30_1="  -0.2486 b^3/2" q40_1="  26.5408 b^2" q50_1="   0.7942 b^5/2" q60_1=" -16.3429 b^3" q70_1="  -1.6187 b^7/2" q80_1="   9.1433 b^4"/>
+        <deformation2 q20_2="  -2.6519 b" q22_2="   0.0000 b" q30_2="  -0.0508 b^3/2" q40_2="   0.0556 b^2" q50_2="   0.0078 b^5/2" q60_2="   0.0197 b^3" q70_2="  -0.0113 b^7/2" q80_2="  -0.0293 b^4"/>
+        <properties1 Ekin_1=" 3220.308 MeV" Enuc_1="-4961.795 MeV" Epair_1="  -10.791 MeV" ECouD_1="  486.707 MeV" ECouE_1="  -26.249 MeV" ECM_1="   -5.852 MeV"/>
+        <properties2 Ekin_2="  952.072 MeV" Enuc_2="-1445.247 MeV" Epair_2="   -5.189 MeV" ECouD_2="   84.896 MeV" ECouE_2="   -7.866 MeV" ECM_2="   -1.793 MeV"/>
+      </fragments>
+      <inertia size="3">
+        <element i="q30" j="q30" value="0.1756 MeV-1.b-3" type="ATDHF"/>
+        <element i="q30" j="q20" value="-0.04873 MeV-1.b-5/2" type="ATDHF"/>
+        <element i="q20" j="q20" value="0.02558 MeV-1.b-2" type="ATDHF"/>
+        <element i="q30" j="q30" value="0.1264 MeV-1.b-3" type="GCM"/>
+        <element i="q30" j="q20" value="-0.03597 MeV-1.b-5/2" type="GCM"/>
+        <element i="q20" j="q20" value="0.01976 MeV-1.b-2" type="GCM"/>
+      </inertia>
+      <metric size="3">
+        <element i="q30" j="q30" value="0.1461 b-3" type="G"/>
+        <element i="q30" j="q20" value="-0.03772 b-5/2" type="G"/>
+        <element i="q20" j="q20" value="0.02106 b-2" type="G"/>
+      </metric>
+    </point>
+    <point id="2">
+      <neighborsID> 0 1 2 3</neighborsID>
+      <stability dE="-3.860000e-07 MeV"/>
+      <fichier nom="hfodd_000003.out" dir="/p/lscratchd/schunck1/pu240_mesh2D_q20q30_NEWinertia_borderNorth1_SKMS_T0.00"/>
+      <basis beta2=" 0.194" omega=" 8.1464" FCHOM0=" 1.2348">
+        <HOfrequencies omega_x=" 8.6585" omega_y=" 8.6585" omega_z=" 7.2113"/>
+        <number_of_shells Nx=" 16" Ny=" 16" Nz=" 19"/>
+        <Gauss_Hermite Ng_x=" 40" Ng_y=" 40" Ng_z=" 66"/>
+        <number_of_states LDBASE="  1102"/>
+      </basis>
+      <constraints>
+        <constraint type="q20" val=" 15.000000 b"/>
+        <constraint type="q22" val="  0.000000 b"/>
+        <constraint type="q30" val=" 76.000000 b^3/2"/>
+        <constraint type="q40" val=" 47.918700 b^2"/>
+        <constraint type="q50" val=" 23.328600 b^5/2"/>
+        <constraint type="q60" val=" 60.607700 b^3"/>
+        <constraint type="q70" val=" 53.317300 b^7/2"/>
+        <constraint type="q80" val=" 24.694400 b^4"/>
+        <constraint type="D" val=" 13.3661 fm"/>
+        <constraint type="xi" val=" -0.587185"/>
+      </constraints>
+      <energies EHFB=" -1580.790166 MeV"/>
+      <corrections>
+        <goaZpe inertiaType="ATDHF" value="   0.700 MeV"/>
+        <goaZpe inertiaType="GCM" value="   1.007 MeV"/>
+      </corrections>
+      <pairing deltaN=" 6.543e-01 MeV" deltaP=" 6.619e-01 MeV" EpairN="-8.196e+00 MeV" EpairP="-5.579e+00 MeV"/>
+      <Fermi lambdaN="-6.994e+00 MeV" lambdaP="-8.020e+00 MeV"/>
+      <temperature T="  0.000000 MeV" S="  0.000000 MeV">
+        <dispersion_N quantum="   3.095" statistical="   0.000"/>
+        <dispersion_Q l="1" m="0" quantum="   7.372" statistical="     0.0"/>
+        <dispersion_Q l="2" m="0" quantum="  36.585" statistical="     0.0"/>
+        <dispersion_Q l="3" m="0" quantum="   7.190" statistical="     0.0"/>
+      </temperature>
+      <neck zN="  1.7888 fm" D=" 13.3661 fm" qN="  0.0918" Nz="  0.0113"/>
+      <fragments>
+        <identity Z1=" 74.0569" A1=" 190.4622" Z2=" 19.9431" A2=" 49.5378"/>
+        <interaction Enuc="   -1.838 MeV" ECou="  136.166 MeV" ECouDir_exact="   0.0000 MeV" ECouExc_exact="   0.0000 MeV"/>
+        <deformation1 q20_1="-123.0466 b" q22_1="   0.0000 b" q30_1="  -0.2323 b^3/2" q40_1="  24.4672 b^2" q50_1="   0.6698 b^5/2" q60_1=" -14.4932 b^3" q70_1="  -1.2784 b^7/2" q80_1="   7.8646 b^4"/>
+        <deformation2 q20_2="  -2.4189 b" q22_2="   0.0000 b" q30_2="  -0.0430 b^3/2" q40_2="   0.0440 b^2" q50_2="   0.0038 b^5/2" q60_2="   0.0142 b^3" q70_2="  -0.0081 b^7/2" q80_2="  -0.0191 b^4"/>
+        <properties1 Ekin_1=" 3292.240 MeV" Enuc_1="-5094.247 MeV" Epair_1="  -10.315 MeV" ECouD_1="  509.723 MeV" ECouE_1="  -26.809 MeV" ECM_1="   -5.854 MeV"/>
+        <properties2 Ekin_2="  883.496 MeV" Enuc_2="-1353.102 MeV" Epair_2="   -2.754 MeV" ECouD_2="   76.881 MeV" ECouE_2="   -7.393 MeV" ECM_2="   -1.687 MeV"/>
+      </fragments>
+      <inertia size="3">
+        <element i="q30" j="q30" value="0.2189 MeV-1.b-3" type="ATDHF"/>
+        <element i="q30" j="q20" value="-0.04119 MeV-1.b-5/2" type="ATDHF"/>
+        <element i="q20" j="q20" value="0.03653 MeV-1.b-2" type="ATDHF"/>
+        <element i="q30" j="q30" value="0.1468 MeV-1.b-3" type="GCM"/>
+        <element i="q30" j="q20" value="-0.0311 MeV-1.b-5/2" type="GCM"/>
+        <element i="q20" j="q20" value="0.02728 MeV-1.b-2" type="GCM"/>
+      </inertia>
+      <metric size="3">
+        <element i="q30" j="q30" value="0.1661 b-3" type="G"/>
+        <element i="q30" j="q20" value="-0.0374 b-5/2" type="G"/>
+        <element i="q20" j="q20" value="0.02662 b-2" type="G"/>
+      </metric>
+    </point>
+  </PES>
+</root>

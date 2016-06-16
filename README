@@ -9,5 +9,6 @@ restart_v2.sh is used after HFODD has completed its run, to collect results in a
 
 PES_plotting_script.py creates nice-looking potential energy surfaces using the output from restart_v2.sh. min_energy.py will, too, as soon as I'm done with it.
 
+parseXMLarray.py uses the XML database created by Nicolas Schunck's script parseHFODDoutput.py to create a .dat file readable by PES_plotting_script.py (that is, it contains the multipole moment constraints and the HFB energies).
 
 density.py and particle_counter.py are a couple of more experimental scripts, that depend on the localization version of HFODD developed by Chunli Zhang. density.py creates cross-sectional views of the total particle density distribution of particles, and particle_counter.py is a very rough attempt to count the number of particles inside a certain region (useful for estimating the most-probable fission fragment yield).
