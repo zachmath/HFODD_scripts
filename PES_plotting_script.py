@@ -54,7 +54,23 @@ elif xaxis in ['Q30', 'q30', 'q_30', 'Q_30']:
 elif xaxis in ['Q40', 'q40', 'q_40', 'Q_40']:
     xaxis="Q40"
     xlabel=r"Neck $\, (\rm{b}^2) $"
-    xcol=8
+    xcol=3
+elif xaxis in ['Q50', 'q50', 'q_50', 'Q_50']:
+    xaxis="Q50"
+    xlabel=r"$ Q_{50} \, (\rm{b}^\frac{5}{2}) $"
+    xcol=4
+elif xaxis in ['Q60', 'q60', 'q_60', 'Q_60']:
+    xaxis="Q60"
+    xlabel=r"$ Q_{60} \, (\rm{b}^3) $"
+    xcol=5
+elif xaxis in ['Q70', 'q70', 'q_70', 'Q_70']:
+    xaxis="Q70"
+    xlabel=r"$ Q_{70} \, (\rm{b}^\frac{7}{2}) $"
+    xcol=6
+elif xaxis in ['Q80', 'q80', 'q_80', 'Q_80']:
+    xaxis="Q80"
+    xlabel=r"$ Q_{80} \, (\rm{b}^4) $"
+    xcol=7
 else:
     xaxis="Q20"
     xlabel=r"Elongation $\, (\rm{b}) $"
@@ -77,7 +93,23 @@ elif yaxis in ['Q30', 'q30', 'q_30', 'Q_30']:
 elif yaxis in ['Q40', 'q40', 'q_40', 'Q_40']:
     yaxis="Q40"
     ylabel=r"Neck $\, (\rm{b}^2) $"
-    ycol=8
+    ycol=3
+elif yaxis in ['Q50', 'q50', 'q_50', 'Q_50']:
+    yaxis="Q50"
+    ylabel=r"$ Q_{50} \, (\rm{b}^\frac{5}{2}) $"
+    ycol=4
+elif yaxis in ['Q60', 'q60', 'q_60', 'Q_60']:
+    yaxis="Q60"
+    ylabel=r"$ Q_{60} \, (\rm{b}^3) $"
+    ycol=5
+elif yaxis in ['Q70', 'q70', 'q_70', 'Q_70']:
+    yaxis="Q70"
+    ylabel=r"$ Q_{70} \, (\rm{b}^\frac{7}{2}) $"
+    ycol=6
+elif yaxis in ['Q80', 'q80', 'q_80', 'Q_80']:
+    yaxis="Q80"
+    ylabel=r"$ Q_{80} \, (\rm{b}^4) $"
+    ycol=7
 else:
     yaxis="Q30"
     ylabel=r"Mass Asymmetry $\, (\rm{b}^\frac{3}{2}) $"
@@ -110,16 +142,16 @@ print "\n The plot will be output to %s. \n" % outfile
 #################################
 
 
-data = np.genfromtxt (infilefission)
+data = np.genfromtxt (infilefission, skip_header=1)
 x0 = data[:,xcol]
 y0 = data[:,ycol]
-z0 = data[:,4]
+z0 = data[:,10]
 
 if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
-    data = np.genfromtxt (infilefusion)
+    data = np.genfromtxt (infilefusion, skip_header=1)
     x1 = data[:,xcol]
     y1 = data[:,ycol]
-    z1 = data[:,4]
+    z1 = data[:,10]
 
 if pathway in ['y', 'Y', 'yes', 'Yes', 'YES']:
     data = np.genfromtxt (pathfile)
