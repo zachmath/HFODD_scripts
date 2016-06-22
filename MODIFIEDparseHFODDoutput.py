@@ -1,4 +1,17 @@
-# Keep this copy around as a backup, and to show you what modifications you had to make to get it to work in one particular case. You had to eliminate a file where the classical energy surface(?) was not formatted correctly, you had to reindex the lines that the energies were found on, and you had to comment out the inertia-related quantities because you didn't use the inertia package when you ran that particular calculation.
+# Keep this copy around as a backup, and to show you what modifications you had to 
+# make to get it to work in one particular case. You had to eliminate a file where 
+# the classical energy surface(?) was not formatted correctly, you had to reindex 
+# the lines that the energies were found on, and you had to comment out the inertia-
+# related quantities because you didn't use the inertia package when you ran that 
+# particular calculation.
+
+# I just commented out almost every line with the word 'dispersion' or 'dis_Q' 
+# because that was giving me trouble.
+
+# If your files seem to be processed correctly but they still don't appear in the XML 
+# tree, it's probably because they fail the Estability < convergenceCriterion test at 
+# the end. Look for "#TEST #FILTER" to see the tests that have most commonly failed 
+# you or given you problems so far.
 
 # Making useful modules available for the script
 import sys
@@ -415,12 +428,14 @@ def point_xml(dictionnaire, number_constraints):
 	dispersion_N = ET.SubElement(temperature, "dispersion_N")
 	dispersion_N.attrib["quantum"] = dictionnaire["N_QF"]
 	dispersion_N.attrib["statistical"] = dictionnaire["N_SF"]
-	for i in range(0,number_constraints):
-		dispersion_Q = ET.SubElement(temperature, "dispersion_Q")
-		dispersion_Q.attrib["l"] = dictionnaire["lambda"][i]
-		dispersion_Q.attrib["m"] = dictionnaire["mu"][i]
-		dispersion_Q.attrib["quantum"] = dictionnaire["Q_QF"][i]
-		dispersion_Q.attrib["statistical"] = dictionnaire["Q_SF"][i]
+# OPTION #TEST #FILTER
+# Something to do with temperature, but it's giving me an error and it's only outputting zeros anyway.
+#	for i in range(0,number_constraints):
+#		dispersion_Q = ET.SubElement(temperature, "dispersion_Q")
+#		dispersion_Q.attrib["l"] = dictionnaire["lambda"][i]
+#		dispersion_Q.attrib["m"] = dictionnaire["mu"][i]
+#		dispersion_Q.attrib["quantum"] = dictionnaire["Q_QF"][i]
+#		dispersion_Q.attrib["statistical"] = dictionnaire["Q_SF"][i]
 	neck = ET.SubElement(point, "neck")
 	neck.attrib["zN"] = dictionnaire["zN"]
 	neck.attrib["D"]  = dictionnaire["D"]
@@ -544,7 +559,17 @@ for fichier in listeFichier:
 	allLines = fread.readlines()
 	fread.close()
 
-	# Get total multipole moments at convergence. Use the information to determine if the 
+	# Sometimes a calculation may time out or be terminated before it finishes running.  #TEST #FILTER
+	# This will determine if the file formatted correctly or if it was interrupted.
+	chaine = '*  NUMBERS OF CALLS TO SUBROUTINES                                            *\n'
+	position_terminate = [i for i, x in enumerate(allLines) if x == chaine]
+	size = len(position_terminate)
+	if size < 1:
+		dico_fichier[fichier] = 0
+		if verbose:
+			print fichier, 'was terminated prematurely.'
+
+	# Get total multipole moments at convergence. Use the information to determine if the  #TEST #FILTER
 	# calculation ran into problems: if there is no such table or only 1, the calculation
 	# did not converge and this file should be disregarded
 	chaine = '*  MULTIPOLE MOMENTS [UNITS:  (10 FERMI)^LAMBDA]                       TOTAL  *\n'
@@ -552,6 +577,8 @@ for fichier in listeFichier:
 	size = len(position_multipole)
 	if size < 2:
 		dico_fichier[fichier] = 0
+		if verbose:
+			print fichier, 'did not converge.'
 	else:
 		actual_line_max = line_max[lambda_max]
 		qlm = []
@@ -566,7 +593,7 @@ for fichier in listeFichier:
 
 	# Only look for meaningful numbers if the file is converged
 	
-	if dico_fichier[fichier] > 0:
+	if dico_fichier[fichier] > 0:  #TEST #FILTER
 		
 		# Get the basis deformation
 		chaine = '*  CLASSICAL NUCLEAR SURFACE DEFINED FOR:'
@@ -808,26 +835,28 @@ for fichier in listeFichier:
 			formatValues(ligneBuffer, append_frag_lQ40, 3)
 			formatValues(ligneBuffer, append_frag_rQ40, 5)
 
-			position    = debut + 4
-			ligneBuffer = allLines[position]
-			formatValues(ligneBuffer, append_frag_lQ50, 3)
-			formatValues(ligneBuffer, append_frag_rQ50, 5)
-
-			position    = debut + 5
-			ligneBuffer = allLines[position]
-			formatValues(ligneBuffer, append_frag_lQ60, 3)
-			formatValues(ligneBuffer, append_frag_rQ60, 5)
-
-			position    = debut + 6
-			ligneBuffer = allLines[position]
-			formatValues(ligneBuffer, append_frag_lQ70, 3)
-			formatValues(ligneBuffer, append_frag_rQ70, 5)
-
-			position    = debut + 7
-			ligneBuffer = allLines[position]
-			formatValues(ligneBuffer, append_frag_lQ80, 3)
-			formatValues(ligneBuffer, append_frag_rQ80, 5)
-
+# OPTION:
+# These high-order multipole moments only matter if you go that high in the rest of the code.  #TEST #FILTER
+#			position    = debut + 4
+#			ligneBuffer = allLines[position]
+#			formatValues(ligneBuffer, append_frag_lQ50, 3)
+#			formatValues(ligneBuffer, append_frag_rQ50, 5)
+#
+#			position    = debut + 5
+#			ligneBuffer = allLines[position]
+#			formatValues(ligneBuffer, append_frag_lQ60, 3)
+#			formatValues(ligneBuffer, append_frag_rQ60, 5)
+#
+#			position    = debut + 6
+#			ligneBuffer = allLines[position]
+#			formatValues(ligneBuffer, append_frag_lQ70, 3)
+#			formatValues(ligneBuffer, append_frag_rQ70, 5)
+#
+#			position    = debut + 7
+#			ligneBuffer = allLines[position]
+#			formatValues(ligneBuffer, append_frag_lQ80, 3)
+#			formatValues(ligneBuffer, append_frag_rQ80, 5)
+#
 
 		else:
 
@@ -876,12 +905,13 @@ for fichier in listeFichier:
 			position         = debut + 8
 			ligneStatistical = [ allLines[position+n] for n in range(0,number_constraints) ]
 			pos = [ 2, 3, 4, 5 ]
-			dispersionQ(ligneStatistical, append_dispersion, pos, number_constraints)
+# OPTION (not actually sure what this does, but it's breaking the thing!)
+#			dispersionQ(ligneStatistical, append_dispersion, pos, number_constraints)  #TEST #FILTER
 		else:
 			append_fthfb_temp(0.0), append_fthfb_entr(0.0)
 			append_fthfb_quan(0.0), append_fthfb_stat(0.0)
 			zero_liste = [ '0' for i in range(0,number_constraints)]
-			append_dispersion( (zero_liste, zero_liste, zero_liste, zero_liste) )
+#			append_dispersion( (zero_liste, zero_liste, zero_liste, zero_liste) )
 
 elapsed_total = (time.time() - start_total)
 print 'Time elapsed for total ....: ', elapsed_total
@@ -1096,11 +1126,11 @@ for fichier,i in zip(listeFichier_good,range(0,len(listeFichier_good))):
 		dis_N_quantum = "{0:> 8.3f}".format(fluctuations_quantum[i])
 	if len(fluctuations_statistical) > 0:
 		dis_N_statistical = "{0:> 8.3f}".format(fluctuations_statistical[i])
-	if len(dispersion) > 0:
-		dis_Q_all = dispersion[i]
+#	if len(dispersion) > 0:
+#		dis_Q_all = dispersion[i]
 
 	# Recording results in the XML tree
-	if abs(float(Estability[i])) < convergenceCriterion:
+	if abs(float(Estability[i])) < convergenceCriterion:  #TEST #FILTER
 		dico["id"]       = str(i)
 		dico["nom"]      = fichier
 		dico["dir"]      = current_directory
@@ -1135,10 +1165,10 @@ for fichier,i in zip(listeFichier_good,range(0,len(listeFichier_good))):
 		# fluctuations (quantum and statistical)
 		dico["N_QF"]     = dis_N_quantum
 		dico["N_SF"]     = dis_N_statistical
-		dico["lambda"]   = dis_Q_all[0]
-		dico["mu"]       = dis_Q_all[1]
-		dico["Q_QF"]     = dis_Q_all[2]
-		dico["Q_SF"]     = dis_Q_all[3]
+#		dico["lambda"]   = dis_Q_all[0]
+#		dico["mu"]       = dis_Q_all[1]
+#		dico["Q_QF"]     = dis_Q_all[2]
+#		dico["Q_SF"]     = dis_Q_all[3]
 		dico["deltaN"]   = DelN + " MeV"
 		dico["deltaP"]   = DelP + " MeV"
 		dico["EpairN"]   = EpaN + " MeV"
@@ -1187,7 +1217,8 @@ for fichier,i in zip(listeFichier_good,range(0,len(listeFichier_good))):
 		dico["ECouE_2"]  = ECouE_2 + " MeV"
 		dico["ECM_2"]    = ECM_2 + " MeV"
 		# Collective inertia
-		# Should be commented out if inertia package not used
+# OPTION #TEST #FILTER
+#		 Should be commented out if inertia package not used
 #		tenseur = liste_Bij[i]
 #		l = len(tenseur)
 #		liste_value = zip(*[ tenseur[j]['mass'] for j in range(0,l) ])
