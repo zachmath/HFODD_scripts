@@ -7,8 +7,6 @@ current_directory = os.getcwd()
 
 os.system('mv summary/* %s' % current_directory)
 
-os.system('mv summary_contents summary/') # Delete this line later!!! It was just to make sure it was moving things properly!
-
 #-------------------------------------------------#
 #             Read in the XML data                #
 #-------------------------------------------------#
@@ -17,7 +15,7 @@ os.chdir("out")
 
 #infile = raw_input("\n Please list the name of the xml file: \n")
 #tree = ET.parse( infile )
-tree = ET.parse('scratch_PES.xml')
+tree = ET.parse('%s_PES.xml' %current_directory)
 root = tree.getroot()
 
 os.chdir(os.pardir)
@@ -102,7 +100,7 @@ lineCounter=0
 for point in points:
 
     for line in point.iter('fichier'):
-        oldindex = line.get('nom')
+        oldindex = line.get('nom')     # "nom" typically has the form "hfodd_000002.out"
     oldindex = oldindex.split('_')[1]
     oldindex = oldindex.split('.')[0]
 
