@@ -124,7 +124,7 @@ if pathway in ['y', 'Y', 'yes', 'Yes', 'YES']:
     pathfile = raw_input("\n Please list the name of the input file which contains the fission pathway data: \n")
 
 
-description = raw_input("\n Would you like to include some description text in the top left corner? (eg $^{176}$Pt \\n UNEDF1) \n")
+description = raw_input("\n Would you like to include some description text in the top left corner? \n")
 if description in ['y', 'Y', 'yes', 'Yes', 'YES']:
     desctext = raw_input("Please enter your text below: (eg '$^{176}$Pt \\n UNEDF1') \n")
 
