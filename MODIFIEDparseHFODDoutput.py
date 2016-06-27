@@ -544,7 +544,6 @@ listeFichier = sorted(glob.glob('hfodd_0*.out'))
 listeFlags = [ 1 for i in range(0,len(listeFichier)) ]
 dico_fichier = dict(zip(listeFichier,listeFlags))
 listeFichier_good = [ fichier for fichier in listeFichier if dico_fichier[fichier]==1 ]
-print 'Outputs which exist: \n', listeFichier_good
 
 # Looping over all files
 count_fichier = -1
@@ -566,8 +565,7 @@ for fichier in listeFichier:
 	size = len(position_terminate)
 	if size < 1:
 		dico_fichier[fichier] = 0
-		if verbose:
-			print fichier, 'was terminated prematurely.'
+		print fichier, 'was terminated prematurely.'
 
 	# Get total multipole moments at convergence. Use the information to determine if the  #TEST #FILTER
 	# calculation ran into problems: if there is no such table or only 1, the calculation
@@ -923,7 +921,6 @@ print 'Time elapsed for total ....: ', elapsed_total
 start_post = time.time()
 
 listeFichier_good = [ fichier for fichier in listeFichier if dico_fichier[fichier]==1 ]
-print 'Outputs which contain all the data: \n', listeFichier_good
 
 if verbose:
 	print "Total number of files...........: ", len(listeFichier)

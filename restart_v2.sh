@@ -3,7 +3,8 @@
 mkdir $HOME/outputs
 
 timestamp="$(date +%F)"
-mkdir $HOME/outputs/$timestamp/
+OUTDIR="$HOME/outputs/176Pt-fission/$timestamp"
+mkdir $OUTDIR
 
 rm badindices.out
 

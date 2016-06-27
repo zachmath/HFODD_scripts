@@ -1,11 +1,19 @@
 import xml.etree.ElementTree as ET
 import numpy as np
-import re, os
+import re, os, time
 
 
 current_directory = os.getcwd()
+root_name = current_directory.rpartition('/')
+fichier_PES = root_name[2] + '_PES.xml'
+
 
 os.system('mv summary/* %s' % current_directory)
+
+timestamp = time.strftime("%m-%d-%Y")
+print timestamp
+
+os.system('OUTDIR="$HOME/outputs/%s"; mkdir $OUTDIR' %timestamp )
 
 #-------------------------------------------------#
 #             Read in the XML data                #
@@ -15,7 +23,7 @@ os.chdir("out")
 
 #infile = raw_input("\n Please list the name of the xml file: \n")
 #tree = ET.parse( infile )
-tree = ET.parse('%s_PES.xml' %current_directory)
+tree = ET.parse('%s' %fichier_PES)
 root = tree.getroot()
 
 os.chdir(os.pardir)
@@ -143,3 +151,5 @@ for point in points:
     os.system('mv rec/%s restart/%s' %(oldRec, newRec))
 
 data_file.close()
+
+os.system('cp out/*.xml $HOME/outputs/%s' %(timestamp))
