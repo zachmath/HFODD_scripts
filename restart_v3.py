@@ -148,7 +148,7 @@ for point in points:
 #                   new indices in hfodd_path.d                  #
 #----------------------------------------------------------------#
 
-    os.system('mv rec/%s restart/%s' %(oldRec, newRec))
+    os.system('cp rec/%s restart/%s' %(oldRec, newRec))
 
 data_file.close()
 
