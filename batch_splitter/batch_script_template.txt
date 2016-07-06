@@ -7,8 +7,8 @@
 #MSUB -l partition=sierra
 #MSUB -l gres=lscratche
 #MSUB -l walltime=10:00:00
-#MSUB -l nodes=9
-#MSUB -l ttc=108
+#MSUB -l nodes=27
+#MSUB -l ttc=324
 #MSUB -m ae
 #MSUB -N 
 #cd $PBS_O_WORKDIR
@@ -76,7 +76,7 @@ fi
 #Running the job
 cd $SCRATCH_DIR
 date > time.txt
-srun -n 27 --ntasks-per-node=3 -c $OMP_NUM_THREADS $EXECUTABLE < /dev/null >& $OUTPUT
+srun -n 81 --ntasks-per-node=3 -c $OMP_NUM_THREADS $EXECUTABLE < /dev/null >& $OUTPUT
 date >> time.txt
 
 # Moving all output files to a separate base directory
