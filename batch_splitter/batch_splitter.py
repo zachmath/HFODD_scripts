@@ -1,12 +1,19 @@
 import numpy as np
-import os, subprocess
+import os, subprocess, re
 
-current_directory = os.getcwd()
+parent_directory = os.getcwd()
+
+executable = 'hf268f'
 
 tasks_per_batch = 81 # Multiples of three help, assuming 3 tasks/node (=> 27 nodes)
 ### NOTE: THIS IS ALREADY ASSUMED IN THE TEMPLATE FILE!!! I HAVEN'T GENERALIZED IT YET
 ### (probably the best way to generalize would be to use a regex instead of a specific number)
 nodes_per_batch = tasks_per_batch/3
+
+# It is assumed that you've already run restart_v3.py, which moved all your good .REC files into restart/ and indexed them into a file hfodd_path.d. This script starts by moving restart/ to a new folder restart_old/, then creating a new restart/ folder which it populates using the good .REC files from the restart_old/ folder to fill in the holes in the PES (which is represented by hfodd_path_new.d).
+
+os.system(" mv restart/ restart_old/ ")
+os.system(" mkdir restart/ ")
 
 #-------------------------------------------------#
 #           Read in HFODD path files              #
@@ -74,28 +81,34 @@ for i in range(0,numConstraints):
 
 
 #-------------------------------------------------#
-#     Import your data somehow, to make it        #
-#                    usable                       #
+#         Make your path data usable by           #
+#            storing it in arrays                 #
 #-------------------------------------------------#
 
 numNewPts = int( breakLine( newPathLines[0] )[1] ) 
 numOldPts = int( breakLine( oldPathLines[0] )[1] ) 
 
-newConstNames = np.zeros((numNewPts, numConstraints))
-oldConstNames = np.zeros((numOldPts, numConstraints))
+newConstNames = listConstraints
+oldConstNames = listConstraints
 
-newConstVals = np.zeros_like(newConstNames)
-oldConstVals = np.zeros_like(oldConstNames)
+newConstVals = np.zeros((numNewPts, numConstraints))
+oldConstVals = np.zeros((numOldPts, numConstraints))
 
 for i in range(0,numNewPts):
-    newConstNames(i,:) = listConstraints
+
+    if i > 0: # Since we already established the first row by assigning newConstNames = listConstraints
+        newConstNames = np.vstack([newConstNames, listConstraints])
+
     for j in range(0,numConstraints):
-        newConstVals(i,j) = int( breakLine( newPathLines[i+1] )[3*j+2] )
+        newConstVals[i,j] = float( breakLine( newPathLines[i+1] )[3*j+2] )
 
 for i in range(0,numOldPts):
-    oldConstNames(i,:) = listConstraints
+
+    if i > 0:
+        oldConstNames = np.vstack([oldConstNames, listConstraints])
+
     for j in range(0,numConstraints):
-        oldConstVals(i,j) = int( breakLine( oldPathLines[i+1] )[3*j+2] )
+        oldConstVals[i,j] = float( breakLine( oldPathLines[i+1] )[3*j+2] )
 
 
 #-------------------------------------------------#
@@ -115,11 +128,11 @@ for i in range(0, numNewPts):
 
         for k in range(0, numConstraints):
 
-            const_restart = newConstNames(i,k)
-            const_old = oldConstNames(j,k)
+            const_restart = newConstNames[i,k]
+            const_old = oldConstNames[j,k]
 
-            q_restart = newConstVals(i,k)
-            q_old = oldConstVals(j,k)
+            q_restart = newConstVals[i,k]
+            q_old = oldConstVals[j,k]
 
             if const_old==const_restart:
                 distance = distance + (q_old - q_restart)**2
@@ -128,11 +141,9 @@ for i in range(0, numNewPts):
             min_dist = distance
             index_optimal = j
 
-    optimal_indices(i) = index_optimal
+    optimal_indices[i] = index_optimal
 
-#    cp restart_old/HFODD_000optimal_indices(i).REC restart/HFODD_0000000i.REC # ...however you choose to implement this...
-
-# Don't forget to add 1 to your indices, since Python indices start from 0 but HFODD indexes starting at 1!
+# Don't forget to add 1 to your indices, since Python indices start from 0 but HFODD indices start at 1!
     oldRec = 'HFODD_' + str(index_optimal+1).zfill(8) + '.REC'
     newRec = 'HFODD_' + str(i+1).zfill(8) + '.REC'
 
@@ -142,69 +153,154 @@ for i in range(0, numNewPts):
 
 #-------------------------------------------------#
 #    Next we need to break the big job into       #
-#             several smaller jobs                #
+#          several smaller job batches            #
 #-------------------------------------------------#
 
+numTasks = numNewPts
+numExtras = 0
 
-numBatches = int(numNewPts/tasks_per_batch)
-if numBatches != numNewPts/tasks_per_batch:
-    numExtras = numNewPts - (tasks_per_batch * numBatches)
-    numBatches = numBatches+1
+numBatches = int(float(numTasks)/float(tasks_per_batch))
+
+if numBatches != float(numTasks)/float(tasks_per_batch):
+    numExtras = numTasks - (tasks_per_batch * numBatches)   # Leftover tasks that don't fit in evenly.
+    numBatches = numBatches+1                               # Let's give them their own batch here
+
+#-------------------------------------------------#
+#    Create batch subfolders and fill them        #
+#       with everything they need to run          #
+#-------------------------------------------------#
 
 for i in range(0,numBatches):
-    os.mkdir("RUN_%s" %i) ### OR WHATEVER IT IS
-    ### STOCK IT WITH A RESTART FOLDER, A REC FOLDER, etc.
-    ### YOU'LL NEED A TEMPLATE .PBS FILE, AS WELL AS HFODD.D and HFODD_MPIIO.D FILES
-    ### AND MAYBE EVEN MORE THAN THAT
-    for j in range(0,tasks_per_batch):
-        old_index = (tasks_per_batch * i) + j + 1
-        new_index = j+1
-        os.system(" cp restart/HFODD_000old_index.REC RUN_%s/HFODD_000new_index.REC " %i) ### THIS NEEDS TO BE CLEANED UP
 
-    # Create batch submission scripts for each folder
-    fichier = 'batch_script_template.txt'
-    fread = open( fichier )
+    batch_subfolder = parent_directory + "/RUN_%s" %i
+
+    try: 
+        os.makedirs(batch_subfolder)
+    except OSError:
+        if not os.path.isdir(batch_subfolder):
+            raise
+
+    os.system(" cp hfodd.d hfodd_mpiio.d %s %s " %(executable, batch_subfolder) ) ### DO I NEED ANY OTHER FILES?
+
+    try: 
+        os.makedirs(batch_subfolder + "/restart")
+        os.makedirs(batch_subfolder + "/rec")
+        os.makedirs(batch_subfolder + "/summary")
+        os.makedirs(batch_subfolder + "/lic")
+        os.makedirs(batch_subfolder + "/qp")
+        os.makedirs(batch_subfolder + "/out")
+    except OSError:
+        if not ( os.path.isdir(batch_subfolder + "/restart") and os.path.isdir(batch_subfolder + "/rec") and os.path.isdir(batch_subfolder + "/summary") and os.path.isdir(batch_subfolder + "/lic") and os.path.isdir(batch_subfolder + "/qp") and os.path.isdir(batch_subfolder + "/out") ):
+            raise
+
+
+#-------------------------------------------------#
+#  Give each subfolder its own set of .REC files  #
+#-------------------------------------------------#
+
+    if (numExtras != 0) and (i == numBatches-1):
+
+        for j in range(0,numExtras):
+
+            old_index = (tasks_per_batch * i) + j + 1
+            new_index = j+1
+
+            oldRec = 'HFODD_' + str(old_index).zfill(8) + '.REC'
+            newRec = 'HFODD_' + str(new_index).zfill(8) + '.REC'
+
+            os.system(" cp %s/restart/%s %s/restart/%s " %(parent_directory, oldRec, batch_subfolder, newRec))
+
+    else:
+
+        for j in range(0,tasks_per_batch):
+
+            old_index = (tasks_per_batch * i) + j + 1
+            new_index = j+1
+
+            oldRec = 'HFODD_' + str(old_index).zfill(8) + '.REC'
+            newRec = 'HFODD_' + str(new_index).zfill(8) + '.REC'
+
+            os.system(" cp %s/restart/%s %s/restart/%s " %(parent_directory, oldRec, batch_subfolder, newRec))
+
+
+#-------------------------------------------------#
+#       Those .REC files will need custom         #
+#         hfodd_path.d & hfodd_path_new.d         #
+#       files to keep track of what's what        #
+#-------------------------------------------------#
+
+# Instead of rewriting/regenerating hfodd_mpiio.d for each subfolder (which might
+# not correspond to a rectangular grid), we just copy hfodd_path_new.d to
+# hfodd_path.d within the batch_subfolder and keep mpidef=4, PRETENDING like we
+# happen to have exactly the same .REC files we'll be calculating.
+
+    pathfile = "RUN_%d-path.d" %i
+    data_file = open(pathfile,'w')
+
+    if (numExtras != 0) and (i == numBatches-1):
+        data_file.write("%d %d \n" %(numConstraints, numExtras) )
+        for j in range(0,numExtras):
+            line = newPathLines[(tasks_per_batch * i) + j + 1]
+            data_file.write( "%s" %line )
+
+    else:
+        data_file.write("%d %d \n" %(numConstraints, tasks_per_batch) )
+        for j in range(0,tasks_per_batch):
+            line = newPathLines[(tasks_per_batch * i) + j + 1]
+            data_file.write( "%s" %line )
+
+    data_file.close()
+
+    os.system(" mv %s %s/hfodd_path_new.d " %(pathfile, batch_subfolder))
+    os.system(" cp %s/hfodd_path_new.d %s/hfodd_path.d " %(batch_subfolder, batch_subfolder))
+
+
+#-------------------------------------------------#
+#         Create batch submission scripts         #
+#            for each batch_subfolder             #
+#-------------------------------------------------#
+
+    batch_file = 'batch_script_template.txt'
+    fread = open( batch_file )
     lines_template = fread.readlines()
     fread.close()
 
     chaine = '#MSUB -N \n'
-    position = [i for i, x in enumerate(lines_template) if x == chaine]
-    lines_template[position[0]] = '#MSUB -N ' + current_directory + '-RUN_' + i + '\n'
+    position = [k for k, x in enumerate(lines_template) if x == chaine]
+    lines_template[position[0]] = '#MSUB -N ' + parent_directory + '-RUN_' + str(i) + '\n'
 
     chaine = 'SCRATCH_DIR=\n'
-    position = [i for i, x in enumerate(lines_template) if x == chaine]
-    lines_template[position[0]] = 'SCRATCH_DIR=\'' + current_directory + '/RUN_' + i + '\'\n'
+    position = [k for k, x in enumerate(lines_template) if x == chaine]
+    lines_template[position[0]] = 'SCRATCH_DIR=\'' + parent_directory + '/RUN_' + str(i) + '\'\n'
 
-    if numExtras != 0:
+    if (numExtras != 0) and (i == numBatches-1):
 
-        if numExtras/3 == int(numExtras/3):
+        if numExtras/3 == float(numExtras)/3.0:
             numNodes = numExtras/3              # 4 cores/task; 12 cores/node => 3 tasks/node
         else:
             numNodes = numExtras/3 + 1          # Reserve an extra node, even if you just need part of it
 
         chaine = '#MSUB -l nodes=9\n'
-        position = [i for i, x in enumerate(lines_template) if x == chaine]
-        lines_template[position[0]] = '#MSUB -l nodes=' + numNodes + '\n'
+        position = [k for k, x in enumerate(lines_template) if x == chaine]
+        lines_template[position[0]] = '#MSUB -l nodes=' + str(numNodes) + '\n'
 
         chaine = '#MSUB -l ttc=108\n'
-        position = [i for i, x in enumerate(lines_template) if x == chaine]
-        lines_template[position[0]] = '#MSUB -l ttc=' + 4*numExtras + '\n'
+        position = [k for k, x in enumerate(lines_template) if x == chaine]
+        lines_template[position[0]] = '#MSUB -l ttc=' + str(4*numExtras) + '\n'
 
         chaine = 'srun -n %s --ntasks-per-node=3 -c $OMP_NUM_THREADS $EXECUTABLE < /dev/null >& $OUTPUT\n' % nodes_per_batch
-        position = [i for i, x in enumerate(lines_template) if x == chaine]
-        lines_template[position[0]] = 'srun -n' + numExtras + ' --ntasks-per-node=3 -c $OMP_NUM_THREADS $EXECUTABLE < /dev/null >& $OUTPUT\n'
+        position = [k for k, x in enumerate(lines_template) if x == chaine]
+        lines_template[position[0]] = 'srun -n' + str(numExtras) + ' --ntasks-per-node=3 -c $OMP_NUM_THREADS $EXECUTABLE < /dev/null >& $OUTPUT\n'
 
     # writing batch job script to file
-    fichier = 'RUN_%s.pbs' %i
-    fwrite = open( fichier, 'w' )
-    for lines in header_full:
-        fwrite.write(lines)
+    batch_file = 'RUN_%d.pbs' %i
+    fwrite = open( batch_file, 'w' )
     for lines in lines_template:
         fwrite.write(lines)
     fwrite.close()
 
-    os.system(" mv RUN_%s.pbs RUN_%s/ " %(i,i) )
-#    os.system(" msub RUN_%s/RUN_%s.pbs " %(i,i) )
+    os.system(" mv %s %s " %(batch_file,batch_subfolder) )
+#    os.system(" msub %s/%s " %(batch_subfolder, batch_file) )
 
 
 #-------------------------------------------------#
@@ -215,12 +311,14 @@ for i in range(0,numBatches):
 ### STITCHING IT BACK TOGETHER - move this to the batch script template!!!
 
 # Check to see if any more jobs are still running
-more_jobs = subprocess.check_output( 'showq -u $USER | grep $USER | wc -l', shell=True)
-more_jobs = int(more_jobs)
-
-if more_jobs == 0:
+#more_jobs = subprocess.check_output( 'showq -u $USER | grep $USER | wc -l', shell=True)
+#more_jobs = int(more_jobs)
+#
+#if more_jobs == 0:
+#    print 'more_jobs = ', more_jobs
 ###    Notify me?
 ###    Stitch them back together automatically?
 ###        Has time ever been an issue down to those last few minutes?
 ###        How long will this script take to run?
 ###    Launch another job to stitch them together automatically?
+###      Don't forget, you'll need the .REC files, the .out files, AND the .QP, .LIC, etc. files
