@@ -41,6 +41,12 @@ def breakLine(element):
     strippedLine = filter(not_empty, brokenLine)
     return strippedLine
 
+def breakLine2(element):
+    currentLine  = re.split("\n",element)
+    brokenLine   = re.split("/",currentLine[0])
+    strippedLine = filter(not_empty, brokenLine)
+    return strippedLine
+
 
 #-------------------------------------------------------------#
 #   Make a list of all constraints used in this calculation   #
@@ -147,7 +153,7 @@ for i in range(0, numNewPts):
     oldRec = 'HFODD_' + str(index_optimal+1).zfill(8) + '.REC'
     newRec = 'HFODD_' + str(i+1).zfill(8) + '.REC'
 
-    print oldRec, 'is being moved to', newRec
+#    print oldRec, 'is being moved to', newRec
     os.system('cp restart_old/%s restart/%s' %(oldRec, newRec))
 
 
@@ -260,6 +266,8 @@ for i in range(0,numBatches):
 #            for each batch_subfolder             #
 #-------------------------------------------------#
 
+    short_folder_name = breakLine2(parent_directory)[-1]
+
     batch_file = 'batch_script_template.txt'
     fread = open( batch_file )
     lines_template = fread.readlines()
@@ -267,7 +275,7 @@ for i in range(0,numBatches):
 
     chaine = '#MSUB -N \n'
     position = [k for k, x in enumerate(lines_template) if x == chaine]
-    lines_template[position[0]] = '#MSUB -N ' + parent_directory + '-RUN_' + str(i) + '\n'
+    lines_template[position[0]] = '#MSUB -N ' + short_folder_name + '-RUN_' + str(i) + '\n'
 
     chaine = 'SCRATCH_DIR=\n'
     position = [k for k, x in enumerate(lines_template) if x == chaine]
