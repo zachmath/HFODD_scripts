@@ -117,6 +117,45 @@ else:
 print "\n The y-axis will show %s, %s" %(yaxis, ylabel)
 
 
+zaxis = raw_input("\n What would you like to plot on the z-axis? (Energy, Q20, Q22, Q30 [default]) \n")
+if zaxis in ['Q20', 'q20', 'q_20', 'Q_20']:
+    zaxis="Q20"
+    zlabel=r"Elongation $\, (\rm{b}) $"
+    zcol=0
+elif zaxis in ['Q22', 'q22', 'q_22', 'Q_22']:
+    zaxis="Q22"
+    zlabel=r"Triaxiality $\, (\rm{b}) $"
+    zcol=1
+elif zaxis in ['Q30', 'q30', 'q_30', 'Q_30']:
+    zaxis="Q30"
+    zlabel=r"Mass Asymmetry $\, (\rm{b}^\frac{3}{2}) $"
+    zcol=2
+elif zaxis in ['Q40', 'q40', 'q_40', 'Q_40']:
+    zaxis="Q40"
+    zlabel=r"Neck $\, (\rm{b}^2) $"
+    zcol=3
+elif zaxis in ['Q50', 'q50', 'q_50', 'Q_50']:
+    zaxis="Q50"
+    zlabel=r"$ Q_{50} \, (\rm{b}^\frac{5}{2}) $"
+    zcol=4
+elif zaxis in ['Q60', 'q60', 'q_60', 'Q_60']:
+    zaxis="Q60"
+    zlabel=r"$ Q_{60} \, (\rm{b}^3) $"
+    zcol=5
+elif zaxis in ['Q70', 'q70', 'q_70', 'Q_70']:
+    zaxis="Q70"
+    zlabel=r"$ Q_{70} \, (\rm{b}^\frac{7}{2}) $"
+    zcol=6
+elif zaxis in ['Q80', 'q80', 'q_80', 'Q_80']:
+    zaxis="Q80"
+    zlabel=r"$ Q_{80} \, (\rm{b}^4) $"
+    zcol=7
+else:
+    zaxis="Energy"
+    zlabel=r"Energy $\, (\rm{MeV}) $"
+    zcol=10
+print "\n The y-axis will show %s, %s" %(yaxis, ylabel)
+
 dots = raw_input("\n Would you like to draw a dot at every single point from the original data set? This lets you see visually which grid points converged and which ones didn't. \n")
 
 pathway = raw_input("\n Would you like to superimpose a fission pathway onto the PES? \n")
@@ -145,13 +184,15 @@ print "\n The plot will be output to %s. \n" % outfile
 data = np.genfromtxt (infilefission, skip_header=1)
 x0 = data[:,xcol]
 y0 = data[:,ycol]
-z0 = data[:,10]
+z0 = data[:,zcol]
+#z0 = data[:,10]
 
 if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
     data = np.genfromtxt (infilefusion, skip_header=1)
     x1 = data[:,xcol]
     y1 = data[:,ycol]
-    z1 = data[:,10]
+    z1 = data[:,zcol]
+#    z1 = data[:,10]
 
 if pathway in ['y', 'Y', 'yes', 'Yes', 'YES']:
     data = np.genfromtxt (pathfile)
@@ -307,7 +348,8 @@ v = [round (elem , decimal_number) for elem in v] # warning, these are positions
 
 # plot the colorbar
 cb = plt.colorbar (CS0 , cax=cbar_ax , ticks=v , norm=matplotlib.colors.Normalize (vmin=minZplot , vmax=maxZplot))
-cb.set_label(r"Energy $\, (\rm{MeV}) $" , fontsize=20, rotation=270, labelpad=20)
+cb.set_label(zlabel , fontsize=20, rotation=270, labelpad=20)
+#cb.set_label(r"Energy $\, (\rm{MeV}) $" , fontsize=20, rotation=270, labelpad=20)
 
 # to get scientific notation (conflict with APS font)
 #matplotlib.rcParams['axes.unicode_minus'] = False
