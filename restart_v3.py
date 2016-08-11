@@ -153,3 +153,7 @@ for point in points:
 data_file.close()
 
 os.system('cp out/*.xml $HOME/outputs/%s' %(timestamp))
+os.system('cp hfodd.d $HOME/outputs/%s' %(timestamp))
+os.system('cp hfodd_mpiio.d $HOME/outputs/%s' %(timestamp))
+os.system('cp hfodd_path_new.d $HOME/outputs/%s' %(timestamp))
+os.system('cp hfodd_path.d $HOME/outputs/%s' %(timestamp))
