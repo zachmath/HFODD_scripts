@@ -30,6 +30,8 @@ for line in root[0][1].iter('constraint'):
 
 print_array.append( 'EHFB' )
 
+print_array.append( 'qN' )
+
 #-------------------------------------------------#
 # Next you should form an array(?) of all the points as independent trees #
 #-------------------------------------------------#
@@ -56,7 +58,11 @@ for point in points:
         energy = re.search('\D\d*\.\d*',EHFB).group(0)
 #        print energy
 
-    row = constraints + [energy] # + [something else]
+    for line in point.iter('neck'):
+        neck = line.get('qN')
+        qN = re.search('\D\d*\.\d*',neck).group(0)
+
+    row = constraints + [energy] + [qN] # + [something else]
 
     print_array = np.vstack (( print_array, row ))
 
