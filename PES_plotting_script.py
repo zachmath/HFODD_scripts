@@ -29,12 +29,12 @@ lvlcross = raw_input("\n\n Do you have a level crossing and between fission and 
 
 if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
     infilefission = raw_input("\n Please list the name of the input file corresponding to the fission configuration: \n")
-    cutofffission = input("\n Please type the energy cutoff scale for the fission configuration: \n")
+    cutofffission = input("\n Please type the z-axis cutoff scale for the fission configuration: \n")
     infilefusion = raw_input("\n Please list the name of the input file corresponding to the fusion configuration: \n")
 #    cutofffusion = input("\n Please type the energy cutoff scale for the fusion configuration: \n")
 else:
     infilefission = raw_input("\n Please list the name of the input file: \n")
-    cutofffission = input("\n Please type the energy cutoff scale: \n")
+    cutofffission = input("\n Please type the z-axis cutoff scale: \n")
     # What to do below? Because you've got everything down there written for two datasets, but here you only have one! Do you just input a second dummy dataset here? Or do you hide any references to the second dataset inside an "if lvlcross=yes" loop?
 
 
@@ -154,6 +154,18 @@ elif zaxis in ['neck', 'qn', 'QN', 'qN']:
     zaxis="qN"
     zlabel=r"Neck $\, (\rm{Q_N}) $"
     zcol=11
+elif zaxis in ['deltaN', 'deltan', 'Deltan', 'DeltaN']:
+    zaxis="deltaN"
+    zlabel=r"$\Delta_N\, (\rm{MeV}) $"
+    zcol=12
+elif zaxis in ['deltaP', 'deltap', 'Deltap', 'DeltaP']:
+    zaxis="deltaP"
+    zlabel=r"$\Delta_P\, (\rm{MeV}) $"
+    zcol=13
+elif zaxis in ['zneck', 'zn', 'ZN', 'zN']:
+    zaxis="zN"
+    zlabel=r"Protons in Neck $\, (\rm{Z_N}) $"
+    zcol=14
 else:
     zaxis="Energy"
     zlabel=r"Energy $\, (\rm{MeV}) $"

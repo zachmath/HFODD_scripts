@@ -25,19 +25,19 @@ points = root.findall("./PES/point")  # The xml tree 'points' contains addresses
 #-------------------------------------------------#
 
 counter = 0
-convergenceCriterion = 3.e-1
+convergenceCriterion = 1
 
 for point in points:
+    index = point.get('id')
 
-    for line in point.iter('stability'):
-        value = line.get('dE')
-        value = re.search('\D\d*\.\d*e-\d*',value).group(0)
+    for line in point.iter('neck'):
+        value = line.get('qN')
+        value = re.search('\D\d*\.\d*',value).group(0)
         value = float(value)
 #        print abs(value)
 
         if abs(value) <= convergenceCriterion:
-#            print abs(value)
-            counter = counter + 1
+            print index
         else:
 #            print 'not %f' %abs(value)
             continue

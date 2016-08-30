@@ -32,6 +32,12 @@ print_array.append( 'EHFB' )
 
 print_array.append( 'qN' )
 
+print_array.append( 'deltaN' )
+
+print_array.append( 'deltaP' )
+
+print_array.append( 'zN' )
+
 #-------------------------------------------------#
 # Next you should form an array(?) of all the points as independent trees #
 #-------------------------------------------------#
@@ -62,7 +68,17 @@ for point in points:
         neck = line.get('qN')
         qN = re.search('\D\d*\.\d*',neck).group(0)
 
-    row = constraints + [energy] + [qN] # + [something else]
+    for line in point.iter('neck'):
+        neck = line.get('zN')
+        zN = re.search('\D\d*\.\d*',neck).group(0)
+
+    for line in point.iter('pairing'):
+        dN = line.get('deltaN')
+        deltaN = re.search('\D\d*\.\d*[de][+-]\d*',dN).group(0)
+        dP = line.get('deltaP')
+        deltaP = re.search('\D\d*\.\d*[de][+-]\d*',dP).group(0)
+
+    row = constraints + [energy] + [qN] + [deltaN] + [deltaP] + [zN] # + [something else]
 
     print_array = np.vstack (( print_array, row ))
 
