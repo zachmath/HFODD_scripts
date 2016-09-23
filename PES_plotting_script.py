@@ -29,12 +29,12 @@ lvlcross = raw_input("\n\n Do you have a level crossing and between fission and 
 
 if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
     infilefission = raw_input("\n Please list the name of the input file corresponding to the fission configuration: \n")
-    cutofffission = input("\n Please type the energy cutoff scale for the fission configuration: \n")
+    cutofffission = input("\n Please type the z-axis cutoff scale for the fission configuration: \n")
     infilefusion = raw_input("\n Please list the name of the input file corresponding to the fusion configuration: \n")
 #    cutofffusion = input("\n Please type the energy cutoff scale for the fusion configuration: \n")
 else:
     infilefission = raw_input("\n Please list the name of the input file: \n")
-    cutofffission = input("\n Please type the energy cutoff scale: \n")
+    cutofffission = input("\n Please type the z-axis cutoff scale: \n")
     # What to do below? Because you've got everything down there written for two datasets, but here you only have one! Do you just input a second dummy dataset here? Or do you hide any references to the second dataset inside an "if lvlcross=yes" loop?
 
 
@@ -117,7 +117,7 @@ else:
 print "\n The y-axis will show %s, %s" %(yaxis, ylabel)
 
 
-zaxis = raw_input("\n What would you like to plot on the z-axis? (Energy, Q20, Q22, Q30 [default]) \n")
+zaxis = raw_input("\n What would you like to plot on the z-axis? (Energy, neck (qN), Q20, Q22, Q30 [default]) \n")
 if zaxis in ['Q20', 'q20', 'q_20', 'Q_20']:
     zaxis="Q20"
     zlabel=r"Elongation $\, (\rm{b}) $"
@@ -150,6 +150,22 @@ elif zaxis in ['Q80', 'q80', 'q_80', 'Q_80']:
     zaxis="Q80"
     zlabel=r"$ Q_{80} \, (\rm{b}^4) $"
     zcol=7
+elif zaxis in ['neck', 'qn', 'QN', 'qN']:
+    zaxis="qN"
+    zlabel=r"Neck $\, (\rm{Q_N}) $"
+    zcol=11
+elif zaxis in ['deltaN', 'deltan', 'Deltan', 'DeltaN']:
+    zaxis="deltaN"
+    zlabel=r"$\Delta_N\, (\rm{MeV}) $"
+    zcol=12
+elif zaxis in ['deltaP', 'deltap', 'Deltap', 'DeltaP']:
+    zaxis="deltaP"
+    zlabel=r"$\Delta_P\, (\rm{MeV}) $"
+    zcol=13
+elif zaxis in ['zneck', 'zn', 'ZN', 'zN']:
+    zaxis="zN"
+    zlabel=r"Protons in Neck $\, (\rm{Z_N}) $"
+    zcol=14
 else:
     zaxis="Energy"
     zlabel=r"Energy $\, (\rm{MeV}) $"
@@ -302,7 +318,9 @@ CS1 = plt.contour (X0 , Y0 , Zplot , 5 , origin=origin , vmin=minZplot , vmax=ma
 plt.clabel(CS1, inline=1, fontsize=10, colors='k')
 
 # This draws a dot at every single point from the original data set, before they are used to make the interpolated contour. It lets you see visually which grid points converged and which ones didn't.
-if dots in ['y', 'Y', 'yes', 'Yes', 'YES']:
+if dots in ['n', 'N', 'no', 'No', 'NO']:
+    pass
+else:
     plot (x0, y0, 'k.')
     if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
         plot (x1, y1, 'g.')
