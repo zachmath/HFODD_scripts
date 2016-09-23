@@ -8,12 +8,6 @@ root_name = current_directory.rpartition('/')
 fichier_PES = root_name[2] + '_PES.xml'
 
 
-os.system('mv summary/* %s' % current_directory)
-
-timestamp = time.strftime("%m-%d-%Y")
-print timestamp
-
-os.system('OUTDIR="$HOME/outputs/%s"; mkdir $OUTDIR' %timestamp )
 
 #-------------------------------------------------#
 #             Read in the XML data                #
@@ -56,7 +50,7 @@ def breakLine(element):
 
 numConstraints = int( breakLine( newPathLines[0] )[0] )
 
-listConstraints = []
+listConstraints = ['q10']
 
 for i in range(0,numConstraints):
     lam = int( breakLine( newPathLines[1] )[3*i] )
@@ -101,7 +95,7 @@ numPoints = len(points)
 
 data_file = open('hfodd_path.d','w')
 
-data_file.write("%d %d \n" %(numConstraints, numPoints) ) # This doesn't seem to work if Q_10 is a constraint in your original file
+data_file.write("%d %d \n" %(numConstraints+1, numPoints) ) # This doesn't seem to work if Q_10 is a constraint in your original file
 
 lineCounter=0
 
@@ -112,8 +106,8 @@ for point in points:
     oldindex = oldindex.split('_')[1]
     oldindex = oldindex.split('.')[0]
 
-    qtypes = []
-    values = []
+    qtypes = ['q10']
+    values = [0.0]
 
     for line in point.iter('constraint'):
         qtype = line.get('type')
@@ -140,7 +134,7 @@ for point in points:
     oldRec = 'HFODD_' + oldindex.zfill(8) + '.REC'
     newRec = 'HFODD_' + str(lineCounter).zfill(8) + '.REC'
 
-    print oldRec, 'is being moved to', newRec
+#    print oldRec, 'is being moved to', newRec
 
 #----------------------------------------------------------------#
 #        Rename the .REC files, which are currently indexed      #
@@ -148,12 +142,8 @@ for point in points:
 #                   new indices in hfodd_path.d                  #
 #----------------------------------------------------------------#
 
+#    os.system('cp rec/%s restart-converged/%s' %(oldRec, newRec))
     os.system('cp rec/%s restart/%s' %(oldRec, newRec))
 
 data_file.close()
 
-os.system('cp out/*.xml $HOME/outputs/%s' %(timestamp))
-os.system('cp hfodd.d $HOME/outputs/%s' %(timestamp))
-os.system('cp hfodd_mpiio.d $HOME/outputs/%s' %(timestamp))
-os.system('cp hfodd_path_new.d $HOME/outputs/%s' %(timestamp))
-os.system('cp hfodd_path.d $HOME/outputs/%s' %(timestamp))

@@ -35,12 +35,12 @@ from lxml import etree as ET
 current_directory = os.getcwd()
 root_name = current_directory.rpartition('/')
 
-verbose               = True
+verbose               = False
 version               = 'git'
-lipkin                = 1 # Is Lipkin turned on? 1=yes, 0=no
+lipkin                = 0 # Is Lipkin turned on? 1=yes, 0=no
 lambda_max            = 4
 number_constraints    = 2
-convergenceCriterion  = 3.e-2
+convergenceCriterion  = 1.e-1
 outputFiles_directory = current_directory + '/out/'
 fichier_PES           = root_name[2] + '_PES.xml'
 dico_units = { 0: '', 1: 'b-1/2', 2: 'b-1', 3: 'b-3/2',  4: 'b-2',  5: 'b-5/2',   6: 'b-3', \
@@ -1252,4 +1252,17 @@ tree.write(fichier_PES, pretty_print=True)
 elapsed_post = (time.time() - start_post)
 print 'Time elapsed for postprocessing ..........: ', elapsed_post
 
+os.system('mv summary/* %s' % current_directory)
+
+timestamp = time.strftime("%m-%d-%Y")
+print timestamp
+
+os.system('OUTDIR="$HOME/outputs/%s"; mkdir $OUTDIR' %timestamp )
+os.system('OUTDIR="$HOME/outputs/%s/176Pt-fission"; mkdir $OUTDIR' %timestamp )
+
+os.system('cp %s/out/*.xml $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
+os.system('cp %s/hfodd.d $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
+os.system('cp %s/hfodd_mpiio.d $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
+os.system('cp %s/hfodd_path_new.d $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
+os.system('cp %s/hfodd_path.d $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
 
