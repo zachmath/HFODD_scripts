@@ -35,27 +35,35 @@ from lxml import etree as ET
 current_directory = os.getcwd()
 root_name = current_directory.rpartition('/')
 
-verbose               = False
-version               = 'git'
-lipkin                = 0 # Is Lipkin turned on? 1=yes, 0=no
+versionXML            = '1.1'
+collective_variables  = ["q20","q30"]
+lipkin                = 0
 lambda_max            = 4
-number_constraints    = 2
-convergenceCriterion  = 1.e-1
+#number_constraints    = 2
+convergenceCriterion  = 1.e100
+verbose               = False
 outputFiles_directory = current_directory + '/out/'
 fichier_PES           = root_name[2] + '_PES.xml'
-dico_units = { 0: '', 1: 'b-1/2', 2: 'b-1', 3: 'b-3/2',  4: 'b-2',  5: 'b-5/2',   6: 'b-3', \
-	              7: 'b-7/2', 8: 'b-4', 9: 'b-9/2', 10: 'b-5', 11: 'b-11/2', 12: 'b-6'}
-dico_inertia = {}
-dico_inertia['-3_0'] = ('xi', 'xi', 0)
-dico_inertia['-2_0'] = ('D',  'D',  1)
-for l in range(1,9):
-	for m in range(0,9):
-		key = str(l)+'_'+str(m)
-		dico_inertia[key] = ('q'+str(l)+str(m), 'i', l)
 
 #---------------------------------------------------------------#
 #                   INITIALIZATIONS                             #
 #---------------------------------------------------------------#
+
+coll_vars = ",".join(collective_variables)
+number_constraints = len(collective_variables)
+size_inertia = number_constraints*(number_constraints+1)/2
+dico_i = [ i for i in range(0,number_constraints) for j in range(i,number_constraints)]
+dico_j = [ j for i in range(0,number_constraints) for j in range(i,number_constraints)]
+dico_units = { 0: '', 1: 'b-1/2', 2: 'b-1', 3: 'b-3/2',  4: 'b-2',  5: 'b-5/2',   6: 'b-3', \
+	                  7: 'b-7/2', 8: 'b-4', 9: 'b-9/2', 10: 'b-5', 11: 'b-11/2', 12: 'b-6'}
+dico_inertia = {}
+dico_inertia['-3_0'] = ('xi', 'xi', 0)
+dico_inertia['-2_0'] = ('D',  'D',  1)
+for l in range(0,9):
+	for m in range(0,9):
+		key = str(l)+'_'+str(m)
+		dico_inertia[key] = l
+multipole = [ m for m in ["q20","q22","q30","q40","q50","q60","q70","q80","D","xi"] if m not in collective_variables ]
 
 nucleus = []
 force, Vn_pair, Vp_pair, cut_off = [], [], [], []
@@ -179,7 +187,7 @@ def CoulombEnergy():
 	append_energy_CouE(ligneFormattee[5])
 
 def rearrangementEnergy():
-	append_energy_rear(ligneFormattee[8])
+	append_energy_rear(ligneFormattee[7]) ##OPTION Should be 8?
 
 def soEnergy():
 	append_energy_spoE(ligneFormattee[3])
@@ -298,13 +306,11 @@ def collectiveInertia(debut, liste_1_append, liste_2_append, liste_3_append):
 	# Get the components of the inertia tensor
 	collective = []
 	while ligne.find('MeV') > -1:
-		[ l, m, lp, mp, m_ATDHF, m_GCM ] = [ extractValues(ligne, i) for i in range(1,7) ]
-		key_bra, key_ket, m_ATDHF, m_GCM = str(int(l))+'_'+str(int(m)), str(int(lp))+'_'+str(int(mp)), float(m_ATDHF), float(m_GCM)
-		(bra, type_bra, units_bra) = dico_inertia[key_bra]
-		(ket, type_ket, units_ket) = dico_inertia[key_ket]
-		collective.append( { 'type_bra': type_bra, 'bra': bra, 'units_bra': units_bra,\
-			             'type_ket': type_ket, 'ket': ket, 'units_ket': units_ket,\
-				     'mass': ( m_ATDHF, m_GCM ) } )
+		[ l, m, lp, mp, m_ATDHF, m_GCM] = [ extractValues(ligne, i) for i in range(1,7) ]
+		key_bra, key_ket, m_ATDHF, m_GCM = str(int(l))+'_'+str(int(m)), str(int(lp))+'_'+str(int(mp)), \
+		                                   float(m_ATDHF), float(m_GCM)
+		collective.append( { 'units' : dico_inertia[key_bra]+dico_inertia[key_ket], \
+			             'mass'  : (m_ATDHF, m_GCM) } )
 		position = position + 1
 		ligne    = allLines[position]
 	liste_1_append(collective)
@@ -315,11 +321,9 @@ def collectiveInertia(debut, liste_1_append, liste_2_append, liste_3_append):
 	collective = []
 	for k in range(0,n):
 		[ l, m, lp, mp, G_GCM ] = [ extractValues(ligne, i) for i in range(1,6) ]
-		key_bra, key_ket, G_GCM = str(int(l))+'_'+str(int(m)), str(int(lp))+'_'+str(int(mp)), float(G_GCM)
-		(bra, type_bra, units_bra) = dico_inertia[key_bra]
-		(ket, type_ket, units_ket) = dico_inertia[key_ket]
-		collective.append( { 'type_bra': type_bra, 'bra': bra, 'units_bra': units_bra,\
-			             'type_ket': type_ket, 'ket': ket, 'units_ket': units_ket,\
+		key_bra, key_ket, G_GCM = str(int(l))+'_'+str(int(m)), str(int(lp))+'_'+str(int(mp)), \
+		                          float(G_GCM)
+		collective.append( { 'units' : dico_inertia[key_bra]+dico_inertia[key_ket], \
 			             'G': G_GCM } )
 		position = position + 1
 		ligne    = allLines[position]
@@ -347,98 +351,68 @@ def removeZEROS(chaine):
 def point_xml(dictionnaire, number_constraints):
 	point = ET.SubElement(PES, "point")
 	point.attrib["id"] = dictionnaire["id"]
-	neighborsID = ET.SubElement(point, "neighborsID")
-	neighborsID.text = dictionnaire["neighborsID"]
-	stability = ET.SubElement(point, "stability")
+	neighbor = ET.SubElement(point, "neighbors")
+	voisin = ET.SubElement(neighbor, "neighbor")
+	voisin.attrib['id'] = "0"
+	stability = ET.SubElement(point, "convergence")
 	stability.attrib["dE"] = dictionnaire["dE"]
-	fichier = ET.SubElement(point, "fichier")
-	fichier.attrib["nom"] = dictionnaire["nom"]
-	fichier.attrib["dir"] = dictionnaire["dir"]
+	fichier = ET.SubElement(point, "file")
+	fichier.attrib["name"] = dictionnaire["nom"]
+	fichier.attrib["dir"]  = dictionnaire["dir"]
 	# Basis characteristics
 	basis = ET.SubElement(point, "basis")
-	basis.attrib["beta2"] = dictionnaire["beta2"]
-	basis.attrib["omega"] = dictionnaire["omega0"]
-	basis.attrib["FCHOM0"] = dictionnaire["FCHOM0"]
-	frequencies = ET.SubElement(basis, "HOfrequencies")
-	frequencies.attrib["omega_x"] = dictionnaire["omega_x"]
-	frequencies.attrib["omega_y"] = dictionnaire["omega_y"]
-	frequencies.attrib["omega_z"] = dictionnaire["omega_z"]
-	Nshells = ET.SubElement(basis, "number_of_shells")
-	Nshells.attrib["Nx"] = dictionnaire["Nx_HO"]
-	Nshells.attrib["Ny"] = dictionnaire["Ny_HO"]
-	Nshells.attrib["Nz"] = dictionnaire["Nz_HO"]
-	GH = ET.SubElement(basis, "Gauss_Hermite")
-	GH.attrib["Ng_x"] = dictionnaire["Ng_x"]
-	GH.attrib["Ng_y"] = dictionnaire["Ng_y"]
-	GH.attrib["Ng_z"] = dictionnaire["Ng_z"]
-	Nstate = ET.SubElement(basis, "number_of_states")
-	Nstate.attrib["LDBASE"] = dictionnaire["LDBASE"]
-	# Global nuclear properties
+	basis.attrib["type"] = "triaxial"
+	base = ET.SubElement(basis, "centers")
+	base.attrib["n"] = "1"
+	base.attrib["d"] = "0.0"
+	base = ET.SubElement(basis, "HOfrequencies")
+	base.attrib["omega_x"] = dictionnaire["omega_x"]
+	base.attrib["omega_y"] = dictionnaire["omega_y"]
+	base.attrib["omega_z"] = dictionnaire["omega_z"]
+	base = ET.SubElement(basis, "deformation")
+	base.attrib["beta2"]  = dictionnaire["beta2"]
+	base.attrib["omega0"] = dictionnaire["omega0"]
+	base.attrib["FCHOM0"] = dictionnaire["FCHOM0"]
+	base = ET.SubElement(basis, "number_of_shells")
+	base.attrib["Nx"] = dictionnaire["Nx_HO"]
+	base.attrib["Ny"] = dictionnaire["Ny_HO"]
+	base.attrib["Nz"] = dictionnaire["Nz_HO"]
+	base = ET.SubElement(basis, "Gauss-Hermite")
+	base.attrib["Ng_x"] = dictionnaire["Ng_x"]
+	base.attrib["Ng_y"] = dictionnaire["Ng_y"]
+	base.attrib["Ng_z"] = dictionnaire["Ng_z"]
+	base = ET.SubElement(basis, "number_of_states")
+	base.attrib["LDBASE"] = dictionnaire["LDBASE"]
+	# Constraints
 	constraints = ET.SubElement(point, "constraints")
-	constraint = ET.SubElement(constraints, "constraint")
-	constraint.attrib["type"] = "q20"
-	constraint.attrib["val"]  = dictionnaire["q20"]
-	constraint = ET.SubElement(constraints, "constraint")
-	constraint.attrib["type"] = "q22"
-	constraint.attrib["val"]  = dictionnaire["q22"]
-	constraint = ET.SubElement(constraints, "constraint")
-	constraint.attrib["type"] = "q30"
-	constraint.attrib["val"]  = dictionnaire["q30"]
-	constraint = ET.SubElement(constraints, "constraint")
-	constraint.attrib["type"] = "q40"
-	constraint.attrib["val"]  = dictionnaire["q40"]
-	constraint = ET.SubElement(constraints, "constraint")
-	constraint.attrib["type"] = "q50"
-	constraint.attrib["val"]  = dictionnaire["q50"]
-	constraint = ET.SubElement(constraints, "constraint")
-	constraint.attrib["type"] = "q60"
-	constraint.attrib["val"]  = dictionnaire["q60"]
-	constraint = ET.SubElement(constraints, "constraint")
-	constraint.attrib["type"] = "q70"
-	constraint.attrib["val"]  = dictionnaire["q70"]
-	constraint = ET.SubElement(constraints, "constraint")
-	constraint.attrib["type"] = "q80"
-	constraint.attrib["val"]  = dictionnaire["q80"]
-	constraint = ET.SubElement(constraints, "constraint")
-	constraint.attrib["type"] = "D"
-	constraint.attrib["val"]  = dictionnaire["D"]
-	constraint = ET.SubElement(constraints, "constraint")
-	constraint.attrib["type"] = "xi"
-	constraint.attrib["val"]  = dictionnaire["xi"]
+	for c in collective_variables:
+		constraint = ET.SubElement(constraints, "constraint")
+		constraint.attrib["type"] = c
+		constraint.attrib["val"]  = dictionnaire[c]
+	# Global properties of the HFB solution
 	energies = ET.SubElement(point, "energies")
+	energies.attrib["iso"]  = "both"
 	energies.attrib["EHFB"] = dictionnaire["EHFB"]
-	corrections = ET.SubElement(point, "corrections")
-	zpe = ET.SubElement(corrections, "goaZpe")
-	zpe.attrib["inertiaType"] = "ATDHF"
-	zpe.attrib["value"] = dictionnaire["E0_ATDHF"] + " MeV"
-	zpe = ET.SubElement(corrections, "goaZpe")
-	zpe.attrib["inertiaType"] = "GCM"
-	zpe.attrib["value"] = dictionnaire["E0_GCM"] + " MeV"
 	pairing = ET.SubElement(point, "pairing")
-	pairing.attrib["deltaN"] = dictionnaire["deltaN"]
-	pairing.attrib["deltaP"] = dictionnaire["deltaP"]
-	pairing.attrib["EpairN"] = dictionnaire["EpairN"]
-	pairing.attrib["EpairP"] = dictionnaire["EpairP"]
-	Fermi = ET.SubElement(point, "Fermi")
-	Fermi.attrib["lambdaN"] = dictionnaire["lambdaN"]
-	Fermi.attrib["lambdaP"] = dictionnaire["lambdaP"]
-	temperature = ET.SubElement(point, "temperature")
-	temperature.attrib["T"] = dictionnaire["T"]
-	temperature.attrib["S"] = dictionnaire["S"]
-	dispersion_N = ET.SubElement(temperature, "dispersion_N")
-	dispersion_N.attrib["quantum"] = dictionnaire["N_QF"]
-	dispersion_N.attrib["statistical"] = dictionnaire["N_SF"]
-# OPTION #TEST #FILTER
-# Something to do with temperature, but it's giving me an error and it's only outputting zeros anyway.
-#	for i in range(0,number_constraints):
-#		dispersion_Q = ET.SubElement(temperature, "dispersion_Q")
-#		dispersion_Q.attrib["l"] = dictionnaire["lambda"][i]
-#		dispersion_Q.attrib["m"] = dictionnaire["mu"][i]
-#		dispersion_Q.attrib["quantum"] = dictionnaire["Q_QF"][i]
-#		dispersion_Q.attrib["statistical"] = dictionnaire["Q_SF"][i]
+	pair = ET.SubElement(pairing, "gaps")
+	pair.attrib["deltaN"] = dictionnaire["deltaN"]
+	pair.attrib["deltaP"] = dictionnaire["deltaP"]
+	pair = ET.SubElement(pairing, "energies")
+	pair.attrib["EpairN"] = dictionnaire["EpairN"]
+	pair.attrib["EpairP"] = dictionnaire["EpairP"]
+	pair = ET.SubElement(pairing, "Fermi")
+	pair.attrib["lambdaN"] = dictionnaire["lambdaN"]
+	pair.attrib["lambdaP"] = dictionnaire["lambdaP"]
+	corrections = ET.SubElement(point, "corrections")
+	corrections.attrib["type"] = "ATDHF"
+	zpe = ET.SubElement(corrections, "goaZpe")
+	zpe.attrib["val"] = dictionnaire["E0_ATDHF"] + " MeV"
+	corrections = ET.SubElement(point, "corrections")
+	corrections.attrib["type"] = "GCM"
+	zpe = ET.SubElement(corrections, "goaZpe")
+	zpe.attrib["val"] = dictionnaire["E0_GCM"] + " MeV"
 	neck = ET.SubElement(point, "neck")
 	neck.attrib["zN"] = dictionnaire["zN"]
-	neck.attrib["D"]  = dictionnaire["D"]
 	neck.attrib["qN"] = dictionnaire["qN"]
 	neck.attrib["Nz"] = dictionnaire["Nz"]
 	# Fission fragment properties
@@ -485,35 +459,50 @@ def point_xml(dictionnaire, number_constraints):
 	properties2.attrib["ECouD_2"] = dictionnaire["ECouD_2"]
 	properties2.attrib["ECouE_2"] = dictionnaire["ECouE_2"]
 	properties2.attrib["ECM_2"]   = dictionnaire["ECM_2"]
-	# Collective inertia
-	size_inertia = len(dictionnaire["type_bra"])
-	inertia = ET.SubElement(point, "inertia")
-	inertia.attrib["size"] = str(size_inertia)
-	for i in range(0,size_inertia):
-		element = ET.SubElement(inertia, "element")
-		element.attrib["i"] = dictionnaire["bra"][i]
-		element.attrib["j"] = dictionnaire["ket"][i]
-		li, lj = dictionnaire["units_bra"][i], dictionnaire["units_ket"][i]
-		element.attrib["value"] = str(dictionnaire["M_ATDHF"][i]) + " MeV-1." + dico_units[li+lj]
-		element.attrib["type"]  = "ATDHF"
-	for i in range(0,size_inertia):
-		element = ET.SubElement(inertia, "element")
-		element.attrib["i"] = dictionnaire["bra"][i]
-		element.attrib["j"] = dictionnaire["ket"][i]
-		li, lj = dictionnaire["units_bra"][i], dictionnaire["units_ket"][i]
-		element.attrib["value"] = str(dictionnaire["M_GCM"][i]) + " MeV-1." + dico_units[li+lj]
-		element.attrib["type"]  = "GCM"
-	# GCM metric tensor
-	size_metric = len(dictionnaire["type_bra"])
-	metric = ET.SubElement(point, "metric")
-	metric.attrib["size"] = str(size_metric)
-	for i in range(0,size_metric):
-		element = ET.SubElement(metric, "element")
-		element.attrib["i"] = dictionnaire["bra"][i]
-		element.attrib["j"] = dictionnaire["ket"][i]
-		li, lj = dictionnaire["units_bra"][i], dictionnaire["units_ket"][i]
-		element.attrib["value"] = str(dictionnaire["G"][i]) + " " + dico_units[li+lj]
-		element.attrib["type"]  = "G"
+##	# Collective inertia
+##	inertia = ET.SubElement(point, "inertia")
+##	inertia.attrib["type"] = "ATDHF"
+##	inertia.attrib["obs"]  = coll_vars
+##	for i in range(0,size_inertia):
+##		element = ET.SubElement(inertia, "elem")
+##		element.attrib["i"] = str(dico_i[i])
+##		element.attrib["j"] = str(dico_j[i])
+##		element.attrib["val"] = str(dictionnaire["M_ATDHF"][i]) + " MeV-1." + dico_units[dictionnaire["units"][i]]
+##	inertia = ET.SubElement(point, "inertia")
+##	inertia.attrib["type"] = "GCM"
+##	inertia.attrib["obs"]  = coll_vars
+##	for i in range(0,size_inertia):
+##		element = ET.SubElement(inertia, "elem")
+##		element.attrib["i"] = str(dico_i[i])
+##		element.attrib["j"] = str(dico_j[i])
+##		element.attrib["val"] = str(dictionnaire["M_GCM"][i]) + " MeV-1." + dico_units[dictionnaire["units"][i]]
+##	# GCM metric tensor
+##	metric = ET.SubElement(point, "metric")
+##	metric.attrib["type"] = "G"
+##	metric.attrib["obs"]  = coll_vars
+##	for i in range(0,size_inertia):
+##		element = ET.SubElement(metric, "val")
+##		element.attrib["i"] = str(dico_i[i])
+##		element.attrib["j"] = str(dico_j[i])
+##		element.attrib["val"] = str(dictionnaire["G"][i]) + dico_units[dictionnaire["units"][i]]
+	# Multipole moments
+	observables = ET.SubElement(point, "observables")
+	for c in multipole:
+		obser = ET.SubElement(observables, "obs")
+		obser.attrib["name"] = c
+		obser.attrib["val"]  = dictionnaire[c]
+	# Finite temperature calculations
+	excitation = ET.SubElement(point, "excitation")
+	excitation.attrib["S"] = dictionnaire["S"]
+	excit = ET.SubElement(excitation, "dispersion_N")
+	excit.attrib["quantum"]    = dictionnaire["N_QF"]
+	excit.attrib["statistical"] = dictionnaire["N_SF"]
+	for i in range(0,number_constraints):
+		excit = ET.SubElement(excitation, "dispersion_Q")
+		excit.attrib["l"]           = dictionnaire["lambda"][i]
+		excit.attrib["m"]           = dictionnaire["mu"][i]
+		excit.attrib["quantum"]     = dictionnaire["Q_QF"][i]
+		excit.attrib["statistical"] = dictionnaire["Q_SF"][i]
 
 	return 0
 
@@ -543,7 +532,6 @@ os.chdir(outputFiles_directory)
 listeFichier = sorted(glob.glob('hfodd_0*.out'))
 listeFlags = [ 1 for i in range(0,len(listeFichier)) ]
 dico_fichier = dict(zip(listeFichier,listeFlags))
-listeFichier_good = [ fichier for fichier in listeFichier if dico_fichier[fichier]==1 ]
 
 # Looping over all files
 count_fichier = -1
@@ -558,25 +546,24 @@ for fichier in listeFichier:
 	allLines = fread.readlines()
 	fread.close()
 
-	# Sometimes a calculation may time out or be terminated before it finishes running.  #TEST #FILTER
-	# This will determine if the file formatted correctly or if it was interrupted.
-	chaine = '*  NUMBERS OF CALLS TO SUBROUTINES                                            *\n'
-	position_terminate = [i for i, x in enumerate(allLines) if x == chaine]
-	size = len(position_terminate)
-	if size < 1:
-		dico_fichier[fichier] = 0
-		print fichier, 'was terminated prematurely.'
+        # Sometimes a calculation may time out or be terminated before it finishes running.  #TEST #FILTER
+        # This will determine if the file formatted correctly or if it was interrupted.
+        chaine = '*  NUMBERS OF CALLS TO SUBROUTINES                                            *\n'
+        position_terminate = [i for i, x in enumerate(allLines) if x == chaine]
+        size = len(position_terminate)
+        if size < 1:
+                dico_fichier[fichier] = 0
+                print fichier, 'was terminated prematurely.'
 
-	# Get total multipole moments at convergence. Use the information to determine if the  #TEST #FILTER
+	# Get total multipole moments at convergence. Use the information to determine if the  #TEST FILTER
 	# calculation ran into problems: if there is no such table or only 1, the calculation
 	# did not converge and this file should be disregarded
 	chaine = '*  MULTIPOLE MOMENTS [UNITS:  (10 FERMI)^LAMBDA]                       TOTAL  *\n'
 	position_multipole = [i for i, x in enumerate(allLines) if x == chaine]
 	size = len(position_multipole)
+#	if size < 1:
 	if size < 2:
 		dico_fichier[fichier] = 0
-		if verbose:
-			print fichier, 'did not converge.'
 	else:
 		actual_line_max = line_max[lambda_max]
 		qlm = []
@@ -590,9 +577,9 @@ for fichier in listeFichier:
 		append_qlm_q( [ item for sublist in qlm for item in sublist ])
 
 	# Only look for meaningful numbers if the file is converged
-	
+
 	if dico_fichier[fichier] > 0:  #TEST #FILTER
-		
+
 		# Get the basis deformation
 		chaine = '*  CLASSICAL NUCLEAR SURFACE DEFINED FOR:'
 		position_s = [ i for i, x in enumerate(allLines) if x.find(chaine) > -1 ]
@@ -640,7 +627,7 @@ for fichier in listeFichier:
 			i = i + 2
 			Nst = re.split('=',breakLine(allLines[i])[2])
 			append_states(Nst[1])
-			
+
 		chaine = '*                                           HOMEGA='
 		position_b = [ i for i, x in enumerate(allLines) if x.find(chaine) > -1 ]
 		size = len(position_b)
@@ -684,7 +671,7 @@ for fichier in listeFichier:
 		else:
 			append_col_mass( {} )
 			append_metric( {} )
-			append_zpe( (0.0, 0.0) ) 
+			append_zpe( (0.0, 0.0) )
 
 		# Get the table of energies
 		chaine = '*                                ENERGIES (MEV)                               *\n'
@@ -758,7 +745,7 @@ for fichier in listeFichier:
 			# Get fission fragment properties: energies, interaction energy, deformations, etc.
 			chaine = "*             |   LEFT  FRAGMENT (z < zN)   |   RIGHT FRAGMENT (z > zN)       *\n"
 			position_energies = [i for i, x in enumerate(allLines) if x == chaine ]
-			
+
 			debut = position_energies[0] + 2
 
 			# Get fragment characteristics (newer versions)
@@ -806,11 +793,11 @@ for fichier in listeFichier:
 			ligneBuffer = allLines[position]
 			formatValues(ligneBuffer, append_frag_lefCOM, 3)
 			formatValues(ligneBuffer, append_frag_rigCOM, 5)
-			
+
 			# Get fission fragment multipole moments (in fragment intrinsic frame)
 			chaine = "*                 MULTIPOLE MOMENTS IN FRAGMENT INTRINSIC FRAME               *\n"
 			position_multipole = [i for i, x in enumerate(allLines) if x == chaine ]
-			
+
 			debut = position_multipole[0] + 4
 
 			position    = debut
@@ -855,6 +842,7 @@ for fichier in listeFichier:
 #			formatValues(ligneBuffer, append_frag_lQ80, 3)
 #			formatValues(ligneBuffer, append_frag_rQ80, 5)
 #
+
 
 		else:
 
@@ -903,13 +891,12 @@ for fichier in listeFichier:
 			position         = debut + 8
 			ligneStatistical = [ allLines[position+n] for n in range(0,number_constraints) ]
 			pos = [ 2, 3, 4, 5 ]
-# OPTION (not actually sure what this does, but it's breaking the thing!)
-#			dispersionQ(ligneStatistical, append_dispersion, pos, number_constraints)  #TEST #FILTER
+			dispersionQ(ligneStatistical, append_dispersion, pos, number_constraints)  #TEST #FILTER
 		else:
 			append_fthfb_temp(0.0), append_fthfb_entr(0.0)
 			append_fthfb_quan(0.0), append_fthfb_stat(0.0)
 			zero_liste = [ '0' for i in range(0,number_constraints)]
-#			append_dispersion( (zero_liste, zero_liste, zero_liste, zero_liste) )
+			append_dispersion( (zero_liste, zero_liste, zero_liste, zero_liste) )
 
 elapsed_total = (time.time() - start_total)
 print 'Time elapsed for total ....: ', elapsed_total
@@ -919,9 +906,7 @@ print 'Time elapsed for total ....: ', elapsed_total
 #-------------------------------------------------------------------------------------------------------------------#
 
 start_post = time.time()
-
 listeFichier_good = [ fichier for fichier in listeFichier if dico_fichier[fichier]==1 ]
-
 if verbose:
 	print "Total number of files...........: ", len(listeFichier)
 	print "Total number of complete files..: ", len(listeFichier_good)
@@ -979,8 +964,10 @@ for fichier,i in zip(listeFichier_good,range(0,len(listeFichier_good))):
 	# Header
 	if not same_PES:
 		PES = ET.SubElement(root, "PES")
-		PES.attrib["name"] = "the big test"
+		PES.attrib["name"] = "The new version!"
 		Global = ET.SubElement(PES, "Global")
+		version = ET.SubElement(Global, "version")
+		version.attrib["XML"] = versionXML
 		nucl = ET.SubElement(Global, "nucleus")
 		nucl.attrib["Z"] = noyau[1]
 		nucl.attrib["N"] = noyau[0]
@@ -1000,8 +987,11 @@ for fichier,i in zip(listeFichier_good,range(0,len(listeFichier_good))):
 		VpairP.attrib["alpha"] = Vp_p[3]
 		PairingCutoff = ET.SubElement(Global, "pairingCutoff")
 		PairingCutoff.attrib["Ecut"] = Ecut
+		solver = ET.SubElement(Global, "comment")
+		solver.attrib['name'] = "HFODD"
+		solver.attrib['version'] = "git"
 		comment = ET.SubElement(Global, "comment")
-		comment.text = "Blabla"
+		comment.text = "HFODD output parser version " + versionXML
 
 		Nprot, Nneut = noyau[1], noyau[0]
 		EDF = skyrme
@@ -1123,8 +1113,8 @@ for fichier,i in zip(listeFichier_good,range(0,len(listeFichier_good))):
 		dis_N_quantum = "{0:> 8.3f}".format(fluctuations_quantum[i])
 	if len(fluctuations_statistical) > 0:
 		dis_N_statistical = "{0:> 8.3f}".format(fluctuations_statistical[i])
-#	if len(dispersion) > 0:
-#		dis_Q_all = dispersion[i]
+	if len(dispersion) > 0:
+		dis_Q_all = dispersion[i]
 
 	# Recording results in the XML tree
 	if abs(float(Estability[i])) < convergenceCriterion:  #TEST #FILTER
@@ -1162,10 +1152,10 @@ for fichier,i in zip(listeFichier_good,range(0,len(listeFichier_good))):
 		# fluctuations (quantum and statistical)
 		dico["N_QF"]     = dis_N_quantum
 		dico["N_SF"]     = dis_N_statistical
-#		dico["lambda"]   = dis_Q_all[0]
-#		dico["mu"]       = dis_Q_all[1]
-#		dico["Q_QF"]     = dis_Q_all[2]
-#		dico["Q_SF"]     = dis_Q_all[3]
+		dico["lambda"]   = dis_Q_all[0]
+		dico["mu"]       = dis_Q_all[1]
+		dico["Q_QF"]     = dis_Q_all[2]
+		dico["Q_SF"]     = dis_Q_all[3]
 		dico["deltaN"]   = DelN + " MeV"
 		dico["deltaP"]   = DelP + " MeV"
 		dico["EpairN"]   = EpaN + " MeV"
@@ -1213,33 +1203,21 @@ for fichier,i in zip(listeFichier_good,range(0,len(listeFichier_good))):
 		dico["ECouD_2"]  = ECouD_2 + " MeV"
 		dico["ECouE_2"]  = ECouE_2 + " MeV"
 		dico["ECM_2"]    = ECM_2 + " MeV"
-		# Collective inertia
+#		# Collective inertia
 # OPTION #TEST #FILTER
-#		 Should be commented out if inertia package not used
+#                Should be commented out if inertia package not used
 #		tenseur = liste_Bij[i]
-#		l = len(tenseur)
-#		liste_value = zip(*[ tenseur[j]['mass'] for j in range(0,l) ])
-#		dico["type_bra"]  = [ tenseur[j]['type_bra'] for j in range(0,l) ]
-#		dico["type_ket"]  = [ tenseur[j]['type_ket'] for j in range(0,l) ]
-#		dico["units_bra"] = [ tenseur[j]['units_bra'] for j in range(0,l) ]
-#		dico["units_ket"] = [ tenseur[j]['units_ket'] for j in range(0,l) ]
-#		dico["bra"]       = [ tenseur[j]['bra'] for j in range(0,l) ]
-#		dico["ket"]       = [ tenseur[j]['ket'] for j in range(0,l) ]
-#		dico["M_ATDHF"]   = liste_value[0]
-#		dico["M_GCM"]     = liste_value[1]
-#		dico["E0_ATDHF"]  = V0_ATDHF
-#		dico["E0_GCM"]    = V0_GCM
-		# GCM metric
-		tenseur = liste_Gij[i]
-		l = len(tenseur)
-		liste_value = [ tenseur[j]['G'] for j in range(0,l) ]
-		dico["type_bra"]  = [ tenseur[j]['type_bra'] for j in range(0,l) ]
-		dico["type_ket"]  = [ tenseur[j]['type_ket'] for j in range(0,l) ]
-		dico["units_bra"] = [ tenseur[j]['units_bra'] for j in range(0,l) ]
-		dico["units_ket"] = [ tenseur[j]['units_ket'] for j in range(0,l) ]
-		dico["bra"]       = [ tenseur[j]['bra'] for j in range(0,l) ]
-		dico["ket"]       = [ tenseur[j]['ket'] for j in range(0,l) ]
-		dico["G"]         = liste_value
+#		liste_value  = zip(*[ tenseur[j]['mass'] for j in range(0,len(tenseur)) ])
+#		dico["units"]    = [ tenseur[j]['units'] for j in range(0,len(tenseur)) ]
+#		dico["M_ATDHF"]  = liste_value[0]
+#		dico["M_GCM"]    = liste_value[1]
+#		dico["E0_ATDHF"] = V0_ATDHF
+#		dico["E0_GCM"]   = V0_GCM
+##		# GCM metric
+##		tenseur = liste_Gij[i]
+##		liste_value = [ tenseur[j]['G'] for j in range(0,len(tenseur)) ]
+##		dico["units"]    = [ tenseur[j]['units'] for j in range(0,len(tenseur)) ]
+##		dico["G"]        = liste_value
 
 		error_flag = point_xml(dico,number_constraints)
 
@@ -1251,18 +1229,4 @@ tree.write(fichier_PES, pretty_print=True)
 
 elapsed_post = (time.time() - start_post)
 print 'Time elapsed for postprocessing ..........: ', elapsed_post
-
-os.system('mv summary/* %s' % current_directory)
-
-timestamp = time.strftime("%m-%d-%Y")
-print timestamp
-
-os.system('OUTDIR="$HOME/outputs/%s"; mkdir $OUTDIR' %timestamp )
-os.system('OUTDIR="$HOME/outputs/%s/176Pt-fission"; mkdir $OUTDIR' %timestamp )
-
-os.system('cp %s/out/*.xml $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
-os.system('cp %s/hfodd.d $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
-os.system('cp %s/hfodd_mpiio.d $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
-os.system('cp %s/hfodd_path_new.d $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
-os.system('cp %s/hfodd_path.d $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
 
