@@ -7,6 +7,9 @@ current_directory = os.getcwd()
 root_name = current_directory.rpartition('/')
 fichier_PES = root_name[2] + '_PES.xml'
 
+q20_spacing = 4
+q30_spacing = 2
+rowMax = 75
 
 
 #-------------------------------------------------#
@@ -123,18 +126,42 @@ for point in points:
             if qtypes[i]==listConstraints[j]:
                 lam = qtypes[i][1]
                 mu = qtypes[i][2]
-                addition='%1s %1s %11s ' %(lam, mu, values[i] )
+                valToAdd = str(round(float(values[i]),1))
+                addition='%1s %1s %11s ' %(lam, mu, valToAdd )
                 newLine.append(addition)
+
+#-----------------------------------------------------------#
+# Implicit in these lines is the understanding that you     #
+#  are doing a PES in the Q20-Q30 plane                     #
+#-----------------------------------------------------------#
+
+                if (lam=='3') & (mu=='0'):
+                    q30 = round(float(values[i]))
+                elif lam=='2' and mu=='0':
+                    q20 = round(float(values[i]))
+                else:
+                    pass
 
 
     data_file.write( "".join(word.center(1) for word in newLine) )
     data_file.write('\n')
     lineCounter+=1
 
-    oldRec = 'HFODD_' + oldindex.zfill(8) + '.REC'
-    newRec = 'HFODD_' + str(lineCounter).zfill(8) + '.REC'
+    archiveIndex = (q30 / q30_spacing) * rowMax + (q20 / q20_spacing + 1)
 
-#    print oldRec, 'is being moved to', newRec
+    oldRec = 'HFODD_' + oldindex.zfill(8) + '.REC'
+    restartRec = 'HFODD_' + str(lineCounter).zfill(8) + '.REC'
+    archiveRec = 'HFODD_' + str(int(archiveIndex)).zfill(8) + '.REC'
+
+    oldOut = 'hfodd_' + oldindex.zfill(6) + '.out'
+    restartOut = 'hfodd_' + str(lineCounter).zfill(6) + '.out'
+    archiveOut = 'hfodd_' + str(int(archiveIndex)).zfill(6) + '.out'
+
+    oldQP = 'HFODD_' + oldindex.zfill(8) + '.QP'
+    restartQP = 'HFODD_' + str(lineCounter).zfill(8) + '.QP'
+    archiveQP = 'HFODD_' + str(int(archiveIndex)).zfill(8) + '.QP'
+
+    print oldRec, 'is being moved to', archiveRec
 
 #----------------------------------------------------------------#
 #        Rename the .REC files, which are currently indexed      #
@@ -143,7 +170,12 @@ for point in points:
 #----------------------------------------------------------------#
 
 #    os.system('cp rec/%s restart-converged/%s' %(oldRec, newRec))
-    os.system('cp rec/%s restart/%s' %(oldRec, newRec))
+#    os.system('cp rec/%s restart/%s' %(oldRec, newRec))
+    os.system('cp rec/%s rec-archive/%s' %(oldRec, archiveRec))
+    os.system('cp out/%s out-archive/%s' %(oldOut, archiveOut))
+    os.system('cp qp/%s qp-archive/%s' %(oldQP, archiveQP))
+#    os.system('cp hfodd_path.d rec-archive-tmp/')
 
 data_file.close()
 
+print "Don't forget to move those rec-archive files to where they ultimately belong!"

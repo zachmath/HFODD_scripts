@@ -1230,3 +1230,19 @@ tree.write(fichier_PES, pretty_print=True)
 elapsed_post = (time.time() - start_post)
 print 'Time elapsed for postprocessing ..........: ', elapsed_post
 
+
+
+os.system('mv summary/* %s' % current_directory)
+
+timestamp = time.strftime("%m-%d-%Y")
+print timestamp
+
+os.system('OUTDIR="$HOME/outputs/%s"; mkdir $OUTDIR' %timestamp )
+os.system('OUTDIR="$HOME/outputs/%s/176Pt-fission"; mkdir $OUTDIR' %timestamp )
+
+os.system('cp %s/out/*.xml $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
+os.system('cp %s/hfodd.d $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
+os.system('cp %s/hfodd_mpiio.d $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
+os.system('cp %s/hfodd_path_new.d $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
+os.system('cp %s/hfodd_path.d $HOME/outputs/%s/176Pt-fission' %(current_directory,timestamp))
+
