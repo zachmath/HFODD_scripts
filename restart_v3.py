@@ -116,14 +116,14 @@ for point in points:
         value = re.search('\D\d*\.\d*',value).group(0)
         values.append(value)
 
-    newLine = []
+    newLine = ['1 0    0.0  ']
 
-    for i in range( 0, len(qtypes) ):
+    for i in range( 1, len(qtypes) ):
         for j in range(0, len(listConstraints) ):
             if qtypes[i]==listConstraints[j]:
                 lam = qtypes[i][1]
                 mu = qtypes[i][2]
-                addition='%1s %1s %11s ' %(lam, mu, values[i] )
+                addition='%1s %1s %8s  ' %(lam, mu, values[i] )
                 newLine.append(addition)
 
 
