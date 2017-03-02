@@ -41,8 +41,9 @@ for point in points:
 #-------------------------------------------------#
 
     for line in point.iter('file'):
-        filnam = line.get('name')
-#        print(filnam)
+        old_index = line.get('name')    # "nom" typically has the form "hfodd_000002.out"
+    old_index = old_index.split('_')[1]
+    old_index = old_index.split('.')[0]
 
     for line in point.iter('HOfrequencies'):
         omega_x = line.get('omega_x')
@@ -75,7 +76,7 @@ for point in points:
 #    the constraints or something, and populate   #
 #    it with the requisite subdirectories and     #
 #    input files (which we can modify later as    #
-#    needed)                                      #
+#    needed) and a restart file                   #
 #-------------------------------------------------#
 
         if qtype == 'q20':
@@ -87,20 +88,25 @@ for point in points:
 
     index = str(q20).zfill(3) + str(q30).zfill(3)
 
+    old_REC = 'rec/HFODD_' + old_index.zfill(8) + '.REC'
+
     subdirectory = parent_directory + "/HFODD_%s/" %index
+    subdir_restart = subdirectory + "/restart/"
 
     try: 
-        os.makedirs(subdirectory)
+        os.makedirs(subdir_restart)
     except OSError:
-        if not os.path.isdir(subdirectory):
+        if not os.path.isdir(subdir_restart):
             raise
 #    except OSError as exc:
 #        raise exc
 
-#    shutil.copy2('hfodd.d', subdirectory + 'hfodd.d') # I'm running into too many errors doing things the 'proper' way
+# I'm running into too many errors doing things the 'proper' way, so I told it to use the system copy instead of the python copy
+#    shutil.copy2('hfodd.d', subdirectory + 'hfodd.d')
 #    shutil.copy2('hfodd_mpiio.d', subdirectory + 'hfodd_mpiio.d')
 #    shutil.copy2('RUN_SCRIPT.pbs', subdirectory + 'RUN_SCRIPT.pbs')
     os.system(" cp hfodd.d hfodd_mpiio.d RUN_SCRIPT.pbs %s %s " %(executable, subdirectory) ) ### DO I NEED ANY OTHER FILES?
+    shutil.copy2(old_REC, subdir_restart + '/HFODD_00000001.REC')
 
     os.chdir(subdirectory)
 
@@ -183,11 +189,22 @@ for point in points:
 
     chaine = 'BASISAUTOM   IBASIS\n'
     position = [k for k, x in enumerate(allLines) if x == chaine]
-    allLines[position[0]+1] = '               1\n'
+    allLines[position[0]+1] = '               0\n'
 
     chaine = 'SURFAC_DEF   LAMBDA   MIU    ALPHAR\n'
     position = [k for k, x in enumerate(allLines) if x == chaine]
     allLines[position[0]+1] = '               2       0      '+ str(beta2) +'\n'
+
+    chaine = 'HOMEGAZERO   FCHOM0\n'
+    position = [k for k, x in enumerate(allLines) if x == chaine]
+    allLines[position[0]+1] = '              '+ str(FCHOM0) +'\n'
+
+    chaine = 'FREQBASIS    HBARIX  HBARIY  HBARIZ  INPOME\n'
+    position = [k for k, x in enumerate(allLines) if x == chaine]
+    allLines[position[0]+1] = '              ' + str(omega_x) + '     ' \
+                                               + str(omega_y) + '     ' \
+                                               + str(omega_z) + '      1\n'
+
 
     # Find and replace the fields which restart the calculation (IF_THO, ICONTI, etc)
 
@@ -195,18 +212,21 @@ for point in points:
     position = [k for k, x in enumerate(allLines) if x == chaine]
     allLines[position[0]+1] = '               0      0.0\n'
 
-#    chaine = 'RESTART      ICONTI\n'
-#    position = [k for k, x in enumerate(allLines) if x == chaine]
-#    allLines[position[0]+1] = '               1\n'
-
-#    chaine = "CONT_PAIRI   IPCONT\n"
-#    position = [k for k, x in enumerate(allLines) if x == chaine]
-#    allLines[position[0]+1] = '               1\n'
-
-    chaine = re.compile('CONT_PAIRI   IPCONT*')
-    line = [string for string in allLines if re.match(string, chaine)]
-    position = [k for k, x in enumerate(allLines) if re.match(str(x), chaine)]
+    chaine = 'RESTART      ICONTI\n'
+    position = [k for k, x in enumerate(allLines) if x == chaine]
     allLines[position[0]+1] = '               1\n'
+
+    chaine = "CONT_PAIRI   IPCONT\n"
+    position = [k for k, x in enumerate(allLines) if x == chaine]
+    allLines[position[0]+1] = '               1\n'
+
+# I was trying to do the matching using regular expressions, in case a space sneaks its way onto the end of the keyword line or something, but it was giving me a lot of trouble so I set it aside for now.
+#    chaine = 'CONT_PAIRI    IPCONT *\n'
+#    line = [string for string in allLines if re.match(string, chaine)]
+#    print line
+#    position = [k for k, x in enumerate(allLines) if re.match(x, chaine)]
+#    print k
+#    allLines[position[0]+1] = '               1\n'
 
     # Write the lines to file
     fwrite = open( fichier, 'w' )
