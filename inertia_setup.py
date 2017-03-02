@@ -250,7 +250,9 @@ for point in points:
     for line in allLines:
         line = re.sub(r'#MSUB -l nodes=[0-9]*', '#MSUB -l nodes=1', line)
         line = re.sub(r'#MSUB -N .*', '#MSUB -N ' + index, line)
+        line = re.sub(r'#MSUB -l walltime=.*', '#MSUB -l walltime=10:00:00', line)
         line = re.sub(r'srun -n [0-9]*', 'srun -n ' + str(num_points), line)
+        line = re.sub(r'SCRATCH_DIR=.*', 'SCRATCH_DIR=' + subdirectory, line)
         fwrite.write(line)
 
     fwrite.close()
