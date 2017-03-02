@@ -17,6 +17,7 @@ parent_directory = os.getcwd()
 
 executable = 'hf268f'
 infile = '294Og-all_PES.xml'
+batch_script = 'RUN_SCRIPT.pbs'
 
 num_constraints = 2 # Number of constraints in the PES
 num_points = 2*num_constraints # Number of neighboring points used in the derivative
@@ -104,8 +105,8 @@ for point in points:
 # I'm running into too many errors doing things the 'proper' way, so I told it to use the system copy instead of the python copy
 #    shutil.copy2('hfodd.d', subdirectory + 'hfodd.d')
 #    shutil.copy2('hfodd_mpiio.d', subdirectory + 'hfodd_mpiio.d')
-#    shutil.copy2('RUN_SCRIPT.pbs', subdirectory + 'RUN_SCRIPT.pbs')
-    os.system(" cp hfodd.d hfodd_mpiio.d RUN_SCRIPT.pbs %s %s " %(executable, subdirectory) ) ### DO I NEED ANY OTHER FILES?
+#    shutil.copy2(batch_script, subdirectory + batch_script)
+    os.system(" cp hfodd.d hfodd_mpiio.d %s %s %s " %(batch_script, executable, subdirectory) ) ### DO I NEED ANY OTHER FILES?
     shutil.copy2(old_REC, subdir_restart + '/HFODD_00000001.REC')
 
     os.chdir(subdirectory)
@@ -221,7 +222,7 @@ for point in points:
     allLines[position[0]+1] = '               1\n'
 
 # I was trying to do the matching using regular expressions, in case a space sneaks its way onto the end of the keyword line or something, but it was giving me a lot of trouble so I set it aside for now.
-#    chaine = 'CONT_PAIRI    IPCONT *\n'
+#    chaine = r'CONT_PAIRI.*\n'
 #    line = [string for string in allLines if re.match(string, chaine)]
 #    print line
 #    position = [k for k, x in enumerate(allLines) if re.match(x, chaine)]
@@ -233,5 +234,27 @@ for point in points:
     for lines in allLines:
         fwrite.write(lines)
     fwrite.close()
+
+#-------------------------------------------------#
+#    Read and modify the batch script file, to    #
+#    first compute the neighboring points and     #
+#    then to run the inertia code at this point   #
+#-------------------------------------------------#
+
+    fread = open( batch_script, 'r' )
+    allLines = fread.readlines()
+    fread.close()
+
+    # Find and replace the fields which define the run
+    fwrite = open (batch_script, 'w')
+    for line in allLines:
+        line = re.sub(r'#MSUB -l nodes=[0-9]*', '#MSUB -l nodes=1', line)
+        line = re.sub(r'#MSUB -N .*', '#MSUB -N ' + index, line)
+        line = re.sub(r'srun -n [0-9]*', 'srun -n ' + str(num_points), line)
+        fwrite.write(line)
+
+    fwrite.close()
+
+# Do I want to add something about running the inertia script automatically? That might be a good thing once I know roughly how long it takes
 
     os.chdir(parent_directory)
