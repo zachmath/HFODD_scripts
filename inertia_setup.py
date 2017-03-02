@@ -252,7 +252,7 @@ for point in points:
         line = re.sub(r'#MSUB -N .*', '#MSUB -N ' + index, line)
         line = re.sub(r'#MSUB -l walltime=.*', '#MSUB -l walltime=10:00:00', line)
         line = re.sub(r'srun -n [0-9]*', 'srun -n ' + str(num_points), line)
-        line = re.sub(r'SCRATCH_DIR=.*', 'SCRATCH_DIR=' + subdirectory, line)
+        line = re.sub(r'SCRATCH_DIR=.*', 'SCRATCH_DIR=\'' + subdirectory + '\'', line)
         fwrite.write(line)
 
     fwrite.close()
