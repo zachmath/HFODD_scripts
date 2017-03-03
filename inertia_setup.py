@@ -194,7 +194,8 @@ for point in points:
 
     chaine = 'SURFAC_DEF   LAMBDA   MIU    ALPHAR\n'
     position = [k for k, x in enumerate(allLines) if x == chaine]
-    allLines[position[0]+1] = '               2       0      '+ str(beta2) +'\n'
+    allLines[position[0]+1] = '              -2       0      '+ str(beta2) +'\n'
+    allLines[position[0]+2] = '               4       0      0.00\n'
 
     chaine = 'HOMEGAZERO   FCHOM0\n'
     position = [k for k, x in enumerate(allLines) if x == chaine]
