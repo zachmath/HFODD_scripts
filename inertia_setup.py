@@ -1,7 +1,7 @@
 import numpy as np                                                                
 import os, subprocess, re, shutil
 import xml.etree.ElementTree as ET
-import errno
+import errno, math
 
 
 parent_directory = os.getcwd()
@@ -19,6 +19,8 @@ executable = 'hf268f'
 infile = '294Og-all_PES.xml'
 batch_script = 'RUN_SCRIPT.pbs'
 
+num_cores = 36 # Number of cores per node in your HPC system
+
 num_constraints = 2 # Number of constraints in the PES
 num_points = 2*num_constraints # Number of neighboring points used in the derivative
 
@@ -33,6 +35,14 @@ tree = ET.parse( infile )
 root = tree.getroot()
 points = root.findall("./PES/point")  # The xml tree 'points' contains addresses for each individual grid point in the PES
 
+global_prop = root.findall("./PES/Global")
+for prop in global_prop:
+    for line in prop.iter('nucleus'):
+        protons = float(line.get('Z'))
+        neutrons = float(line.get('N'))
+        a_mass = neutrons + protons
+
+
 for point in points:
 
 #-------------------------------------------------#
@@ -45,22 +55,6 @@ for point in points:
         old_index = line.get('name')    # "nom" typically has the form "hfodd_000002.out"
     old_index = old_index.split('_')[1]
     old_index = old_index.split('.')[0]
-
-    for line in point.iter('HOfrequencies'):
-        omega_x = line.get('omega_x')
-        omega_x = float(omega_x)
-        omega_y = line.get('omega_y')
-        omega_y = float(omega_y)
-        omega_z = line.get('omega_z')
-        omega_z = float(omega_z)
-
-    for line in point.iter('deformation'):
-        beta2 = line.get('beta2')
-        beta2 = float(beta2)
-        omega0 = line.get('omega0')
-        omega0 = float(omega0)
-        FCHOM0 = line.get('FCHOM0')
-        FCHOM0 = float(FCHOM0)
 
     qtypes = ['q10']
     values = [0.0]
@@ -82,6 +76,10 @@ for point in points:
 
         if qtype == 'q20':
             q20 = int(round(float(value),0))
+            # These values come from the subroutine ADJBAS in HFODD
+            beta2 = 0.05*math.sqrt(abs(q20))
+            omega0 = 0.1*abs(q20)*math.exp(-0.02*abs(q20))+6.5
+            FCHOM0 = omega0/(41/a_mass**(1./3))
         elif qtype == 'q30':
             q30 = int(round(float(value),0))
         else:
@@ -201,11 +199,6 @@ for point in points:
     position = [k for k, x in enumerate(allLines) if x == chaine]
     allLines[position[0]+1] = '              '+ str(FCHOM0) +'\n'
 
-    chaine = 'FREQBASIS    HBARIX  HBARIY  HBARIZ  INPOME\n'
-    position = [k for k, x in enumerate(allLines) if x == chaine]
-    allLines[position[0]+1] = '              ' + str(omega_x) + '     ' \
-                                               + str(omega_y) + '     ' \
-                                               + str(omega_z) + '      1\n'
 
 
     # Find and replace the fields which restart the calculation (IF_THO, ICONTI, etc)
@@ -221,6 +214,11 @@ for point in points:
     chaine = "CONT_PAIRI   IPCONT\n"
     position = [k for k, x in enumerate(allLines) if x == chaine]
     allLines[position[0]+1] = '               1\n'
+
+    chaine = "CONTAUGMEN   IACONT\n"
+    position = [k for k, x in enumerate(allLines) if x == chaine]
+    allLines[position[0]+1] = '               1\n'
+
 
 # I was trying to do the matching using regular expressions, in case a space sneaks its way onto the end of the keyword line or something, but it was giving me a lot of trouble so I set it aside for now.
 #    chaine = r'CONT_PAIRI.*\n'
@@ -251,8 +249,10 @@ for point in points:
     for line in allLines:
         line = re.sub(r'#MSUB -l nodes=[0-9]*', '#MSUB -l nodes=1', line)
         line = re.sub(r'#MSUB -N .*', '#MSUB -N ' + index, line)
-        line = re.sub(r'#MSUB -l walltime=.*', '#MSUB -l walltime=10:00:00', line)
+        line = re.sub(r'#MSUB -l walltime=.*', '#MSUB -l walltime=5:00:00', line)
+        line = re.sub(r'OMP_NUM_THREADS=[0-9]*', 'OMP_NUM_THREADS=' + str(num_cores/num_points), line)
         line = re.sub(r'srun -n [0-9]*', 'srun -n ' + str(num_points), line)
+        line = re.sub(r'--ntasks-per-node=[0-9]*', '--ntasks-per-node=' + str(num_points), line)
         line = re.sub(r'SCRATCH_DIR=.*', 'SCRATCH_DIR=\'' + subdirectory + '\'', line)
         fwrite.write(line)
 
