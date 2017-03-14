@@ -7,9 +7,9 @@ current_directory = os.getcwd()
 root_name = current_directory.rpartition('/')
 fichier_PES = root_name[2] + '_PES.xml'
 
-q20_spacing = 4
-q30_spacing = 2
-rowMax = 75
+#q20_spacing = 4
+#q30_spacing = 2
+#rowMax = 75
 
 
 #-------------------------------------------------#
@@ -18,8 +18,6 @@ rowMax = 75
 
 os.chdir("out")
 
-#infile = raw_input("\n Please list the name of the xml file: \n")
-#tree = ET.parse( infile )
 tree = ET.parse('%s' %fichier_PES)
 root = tree.getroot()
 
@@ -104,8 +102,8 @@ lineCounter=0
 
 for point in points:
 
-    for line in point.iter('fichier'):
-        oldindex = line.get('nom')     # "nom" typically has the form "hfodd_000002.out"
+    for line in point.iter('file'):
+        oldindex = line.get('name')     # "name" typically has the form "hfodd_000002.out"
     oldindex = oldindex.split('_')[1]
     oldindex = oldindex.split('.')[0]
 
@@ -148,7 +146,8 @@ for point in points:
     data_file.write('\n')
     lineCounter+=1
 
-    archiveIndex = (q30 / q30_spacing) * rowMax + (q20 / q20_spacing + 1)
+#    archiveIndex = (q30 / q30_spacing) * rowMax + (q20 / q20_spacing + 1)
+    archiveIndex = str(q20).zfill(3) + str(q30).zfill(3)
 
     oldRec = 'HFODD_' + oldindex.zfill(8) + '.REC'
     restartRec = 'HFODD_' + str(lineCounter).zfill(8) + '.REC'
@@ -170,13 +169,11 @@ for point in points:
 #                   new indices in hfodd_path.d                  #
 #----------------------------------------------------------------#
 
-#    os.system('cp rec/%s restart-converged/%s' %(oldRec, newRec))
-#    os.system('cp rec/%s restart/%s' %(oldRec, newRec))
     os.system('cp rec/%s rec-archive/%s' %(oldRec, archiveRec))
     os.system('cp out/%s out-archive/%s' %(oldOut, archiveOut))
     os.system('cp qp/%s qp-archive/%s' %(oldQP, archiveQP))
-#    os.system('cp hfodd_path.d rec-archive-tmp/')
+#    os.system('cp rec/%s /usr/workspace/wsb/matheson/rprocess/294Og/rec-archive/%s' %(oldRec, archiveRec))
+#    os.system('cp out/%s /usr/workspace/wsb/matheson/rprocess/294Og/out-archive/%s' %(oldOut, archiveOut))
+#    os.system('cp qp/%s /usr/workspace/wsb/matheson/rprocess/294Og/qp-archive/%s' %(oldQP, archiveQP))
 
 data_file.close()
-
-print "Don't forget to move those rec-archive files to where they ultimately belong!"
