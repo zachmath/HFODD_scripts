@@ -135,9 +135,9 @@ for point in points:
 #-----------------------------------------------------------#
 
                 if (lam=='3') & (mu=='0'):
-                    q30 = round(float(values[i]))
+                    q30 = int(round(float(values[i])))
                 elif lam=='2' and mu=='0':
-                    q20 = round(float(values[i]))
+                    q20 = int(round(float(values[i])))
                 else:
                     pass
 
@@ -169,11 +169,11 @@ for point in points:
 #                   new indices in hfodd_path.d                  #
 #----------------------------------------------------------------#
 
-    os.system('cp rec/%s rec-archive/%s' %(oldRec, archiveRec))
-    os.system('cp out/%s out-archive/%s' %(oldOut, archiveOut))
-    os.system('cp qp/%s qp-archive/%s' %(oldQP, archiveQP))
-#    os.system('cp rec/%s /usr/workspace/wsb/matheson/rprocess/294Og/rec-archive/%s' %(oldRec, archiveRec))
-#    os.system('cp out/%s /usr/workspace/wsb/matheson/rprocess/294Og/out-archive/%s' %(oldOut, archiveOut))
-#    os.system('cp qp/%s /usr/workspace/wsb/matheson/rprocess/294Og/qp-archive/%s' %(oldQP, archiveQP))
+#    os.system('cp rec/%s rec-archive/%s' %(oldRec, archiveRec))
+#    os.system('cp out/%s out-archive/%s' %(oldOut, archiveOut))
+#    os.system('cp qp/%s qp-archive/%s' %(oldQP, archiveQP))
+    os.system('cp rec/%s /usr/workspace/wsb/matheson/rprocess/294Og/rec-archive/%s' %(oldRec, archiveRec))
+    os.system('cp out/%s /usr/workspace/wsb/matheson/rprocess/294Og/out-archive/%s' %(oldOut, archiveOut))
+    os.system('cp qp/%s /usr/workspace/wsb/matheson/rprocess/294Og/qp-archive/%s' %(oldQP, archiveQP))
 
 data_file.close()
