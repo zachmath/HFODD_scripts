@@ -1,3 +1,11 @@
+###############################################################################
+# This script will collect whatever outputs you have recorded in your PES XML #
+# file, and generate the hfodd_path files you'll need to generate satellite   #
+# points around each point in your PES using HFODD. Once the HFODD run is     #
+# completed, use the "post-run" script to collect and rename the output files #
+# into a folder where they can be used in the inertia code.                   #
+###############################################################################
+
 import xml.etree.ElementTree as ET
 import numpy as np
 import re, os, time
@@ -5,11 +13,7 @@ import re, os, time
 
 current_directory = os.getcwd()
 root_name = current_directory.rpartition('/')
-fichier_PES = root_name[2] + '_PES.xml'
-
-q20_spacing = 4
-q30_spacing = 2
-rowMax = 75
+PES_file = root_name[2] + '_PES.xml'
 
 #-------------------------------------------------#
 #    In the preliminary matter, set the parameter #
@@ -18,10 +22,6 @@ rowMax = 75
 #        dx = d_q20, dy = d_q30, dz = d_q22       #
 #    Also list the name of the XML file           #
 #-------------------------------------------------#
-
-executable = 'hf268f'
-infile = '294Og-all_PES.xml'
-batch_script = 'RUN_SCRIPT.pbs'
 
 num_constraints = 2 # Number of constraints in the PES
 nNeighbors = 2*num_constraints # Number of neighboring points used in the derivative
@@ -35,9 +35,7 @@ dx = 0.001 # This is the amount your multipole constraints will change as you ca
 
 os.chdir("out-archive")
 
-#infile = raw_input("\n Please list the name of the xml file: \n")
-#tree = ET.parse( infile )
-tree = ET.parse('%s' %fichier_PES)
+tree = ET.parse('%s' %PES_file)
 root = tree.getroot()
 
 os.chdir(os.pardir)
