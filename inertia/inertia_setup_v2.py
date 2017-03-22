@@ -1,13 +1,13 @@
 import numpy as np                                                                
 import os, subprocess, re, shutil
 import xml.etree.ElementTree as ET
-import errno
+import errno, math
 
 # Specify the source directory, which is where your outputs, record files, and qp files are stored
 
-qp-archive = '/usr/workspace/wsb/matheson/rprocess/294Og/qp-archive'
-rec-archive = '/usr/workspace/wsb/matheson/rprocess/294Og/rec-archive'
-out-archive = '/usr/workspace/wsb/matheson/rprocess/294Og/out-archive'
+qp_archive = '/usr/workspace/wsb/matheson/rprocess/294Og/qp-archive'
+rec_archive = '/usr/workspace/wsb/matheson/rprocess/294Og/rec-archive'
+out_archive = '/usr/workspace/wsb/matheson/rprocess/294Og/out-archive'
 
 # Specify the scratch directory, the XML file, the HFODD executable, the inertia executable (all of which should be in the scratch directory, along with the HFODD input files hfodd.d and hfodd_mpiio.d)
 
@@ -31,7 +31,7 @@ dx = 0.001 # This is the amount your multipole constraints will change as you ca
 
 # Read the XML file. Extract Q20 values and round to the nearest integer
 
-tree = ET.parse( infile )
+tree = ET.parse( xml_file )
 root = tree.getroot()
 points = root.findall("./PES/point")
 
@@ -43,6 +43,7 @@ for prop in global_prop:
         a_mass = neutrons + protons
 
 q20values = []
+file_count = []
 
 for point in points:
     for line in point.iter('constraint'):
@@ -52,12 +53,12 @@ for point in points:
             value = re.search('\D\d*\.\d*',value).group(0)
             q20 = int(round(float(value),0))
             if q20 not in q20values:
-                q20values.append(value)
+                q20values.append(q20)
 
 # Create a subdirectory in your scratch directory for each value of Q20
 
 for q20 in q20values:
-    subdirectory = scratch_dir + "/q20-%s/" %q20
+    subdirectory = scratch_dir + "/q20-%s/" %str(q20)
     subdir_restart = subdirectory + "/restart/"
 
     try: 
@@ -72,8 +73,11 @@ for q20 in q20values:
 
 ## Within each subdirectory, modify the input file hfodd.d with the appropriate basis (and make sure the proper restart settings are enabled)
 
-    omega0 = 0.1 * q20 * math.exp( -0.02 * q20 ) + 6.5
-    beta2 = 0.05 * math.sqrt( q20 )
+    if abs(q20)>30:
+        omega0 = 0.1 * float(abs(q20)) * math.exp( -0.02 * float(abs(q20)) ) + 6.5
+    else:
+        omega0 = 8.1464
+    beta2 = 0.05 * math.sqrt( float( abs(q20) ) )
     FCHOM0 = omega0 / ( 41. / a_mass**(1./3.) )
 
     fichier = subdirectory + 'hfodd.d'
@@ -136,6 +140,7 @@ for q20 in q20values:
                 q20test = int(round(float(value),0))
                 if q20test == q20:
                     file_counter += 1
+    file_count.append(file_counter)
 
     data_file = open(subdirectory + 'hfodd_path.d','w')
     data_file2 = open(subdirectory + 'hfodd_path_new.d','w')
@@ -163,8 +168,8 @@ for q20 in q20values:
                     oldindex = oldindex.split('.')[0]
                     old_rec = 'HFODD_' + oldindex.zfill(8) + '.REC'
                     new_rec = 'HFODD_' + str(file_counter).zfill(8) + '.REC'
-                    shutil.copy2(old_rec, subdir_restart + new_rec)
-
+#                    shutil.copy2(rec_archive + old_rec, subdir_restart + new_rec)
+                    print(rec_archive + old_rec, 'moved to', subdir_restart + new_rec)
 
 ## Within each subdirectory, parse the XML file and build a list hfodd_path.d of which files belong to that subdirectory
 ## At the same time, build a list hfodd_path_new.d of the satellite points you'll need to calculate to compute the inertia
@@ -201,9 +206,10 @@ for q20 in q20values:
     data_file2.close()
 
 
-
-
 #! You can now submit these subdirectory jobs to the queue. Depending how you have things set up, you might just need to run them using separate SRUN commands
+
+for i in range( 0, len(q20values) ):
+
 
 ##! After each subdirectory HFODD run completes (and hopefully as part of that SRUN command? - maybe the key is to move the SRUN command to the very beginning once the directories are defined, and explain what it is to do via another "inner" Python script?), you'll want to collect your qp outputs and name them according to the same naming scheme as the original files (this could be tricky, but you have the XML file and the hfodd_path_new.d file in there still so there is at least some kind of reference)
 
