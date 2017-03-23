@@ -56,6 +56,8 @@ for point in points:
                 q20values.append(q20)
 
 # Create a subdirectory in your scratch directory for each value of Q20
+## This would be a good place to do an MPI_Comm_Spawn or whatever you decide to do. Pretty much everything after this point can be done independently in the different q20 folders. You'd spawn a number of tribes and then assign them to a q20 value by like "for i in range(0, len(q20values): if tribe_num == i: q20 = q20values[i]; subdirectory = ..."
+## The tribes really don't need to talk to each other. One very real danger, though, is that some tribes would have very little work to do and some would have a lot, just depending how many points there are for each value of q20. It would be great to implement some kind of load balancing
 
 for q20 in q20values:
     subdirectory = scratch_dir + "/q20-%s/" %str(q20)
@@ -144,8 +146,8 @@ for q20 in q20values:
 
     data_file = open(subdirectory + 'hfodd_path.d','w')
     data_file2 = open(subdirectory + 'hfodd_path_new.d','w')
-    data_file.write("%d %d \n" %(num_constraints, file_counter) )
-    data_file2.write("%d %d \n" %(num_constraints, file_counter*nNeighbors) )
+    data_file.write("%d %d \n" %(num_constraints+1, file_counter) )
+    data_file2.write("%d %d \n" %(num_constraints+1, file_counter*nNeighbors) )
 
     file_counter = 0
 
@@ -174,33 +176,33 @@ for q20 in q20values:
 ## Within each subdirectory, parse the XML file and build a list hfodd_path.d of which files belong to that subdirectory
 ## At the same time, build a list hfodd_path_new.d of the satellite points you'll need to calculate to compute the inertia
 
-        newLine = ['1 0    0.0  ']
-        newLine2 = ['1 0    0.0  ']
+                    newLine = ['1 0    0.0  ']
+                    newLine2 = ['1 0    0.0  ']
 
-        for i in range( 1, len(qtypes) ):
-            lam = qtypes[i][1]
-            mu = qtypes[i][2]
-            addition='%1s %1s %8s  ' %(lam, mu, values[i] )
-            newLine.append(addition)
+                    for i in range( 1, len(qtypes) ):
+                        lam = qtypes[i][1]
+                        mu = qtypes[i][2]
+                        addition='%1s %1s %8s  ' %(lam, mu, values[i] )
+                        newLine.append(addition)
 
-            for line in range( 1, nNeighbors+1 ):
-                if( (line-1)/2 == (i-1) ):
+                        for line in range( 1, nNeighbors+1 ):
+                            if( (line-1)/2 == (i-1) ):
 
-                    if( line % 2 == 0):
-                        addition='%1s %1s %8s  ' %(lam, mu, str(float(values[i])+dx) )
-                    else:
-                        addition='%1s %1s %8s  ' %(lam, mu, str(float(values[i])-dx) )
-                else:
-                    addition='%1s %1s %8s  ' %(lam, mu, values[i] )
+                                if( line % 2 == 0):
+                                    addition='%1s %1s %8s  ' %(lam, mu, str(float(values[i])+dx) )
+                                else:
+                                    addition='%1s %1s %8s  ' %(lam, mu, str(float(values[i])-dx) )
+                            else:
+                                addition='%1s %1s %8s  ' %(lam, mu, values[i] )
 
-                newLine2.append(addition)
+                            newLine2.append(addition)
 
-            data_file2.write( "".join(word.center(1) for word in newLine) )
-            data_file2.write('\n')
+                        data_file2.write( "".join(word.center(1) for word in newLine) )
+                        data_file2.write('\n')
 
 
-        data_file.write( "".join(word.center(1) for word in newLine) )
-        data_file.write('\n')
+                    data_file.write( "".join(word.center(1) for word in newLine) )
+                    data_file.write('\n')
 
     data_file.close()
     data_file2.close()
@@ -209,6 +211,9 @@ for q20 in q20values:
 #! You can now submit these subdirectory jobs to the queue. Depending how you have things set up, you might just need to run them using separate SRUN commands
 
 for i in range( 0, len(q20values) ):
+    # Submit a job to the queue which has nNeighbors*file_count[i] tasks, i.e.
+    # os.system( 'srun -N1 -n%d -o %s/%s.txt %s &' %(nNeighbors*file_count[i], subdirectory, executable, executable) )
+    pass
 
 
 ##! After each subdirectory HFODD run completes (and hopefully as part of that SRUN command? - maybe the key is to move the SRUN command to the very beginning once the directories are defined, and explain what it is to do via another "inner" Python script?), you'll want to collect your qp outputs and name them according to the same naming scheme as the original files (this could be tricky, but you have the XML file and the hfodd_path_new.d file in there still so there is at least some kind of reference)
