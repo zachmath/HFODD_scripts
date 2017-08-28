@@ -41,16 +41,19 @@ else:
 xaxis = raw_input("\n Which multipole moment would you like to plot on the x-axis? (Q20 [default], Q22, Q30) \n")
 if xaxis in ['Q20', 'q20', 'q_20', 'Q_20']:
     xaxis="Q20"
-    xlabel=r"Elongation $\, (\rm{b}) $"
+    xlabel=r"$ Q_{20} \, (\rm{b}) $"
+#    xlabel=r"Elongation $\, (\rm{b}) $"
     xcol=0
 elif xaxis in ['Q22', 'q22', 'q_22', 'Q_22']:
     xaxis="Q22"
-    xlabel=r"Triaxiality $\, (\rm{b}) $"
-    xcol=1
+    xlabel=r"$ Q_{22} \, (\rm{b}) $"
+#    xlabel=r"Triaxiality $\, (\rm{b}) $"
+    xcol=2
 elif xaxis in ['Q30', 'q30', 'q_30', 'Q_30']:
     xaxis="Q30"
-    xlabel=r"Mass Asymmetry $\, (\rm{b}^\frac{3}{2}) $"
-    xcol=2
+    xlabel=r"$ Q_{30} \, (\rm{b}^\frac{3}{2}) $"
+#    xlabel=r"Mass Asymmetry $\, (\rm{b}^\frac{3}{2}) $"
+    xcol=1
 elif xaxis in ['Q40', 'q40', 'q_40', 'Q_40']:
     xaxis="Q40"
     xlabel=r"Neck $\, (\rm{b}^2) $"
@@ -73,23 +76,27 @@ elif xaxis in ['Q80', 'q80', 'q_80', 'Q_80']:
     xcol=7
 else:
     xaxis="Q20"
-    xlabel=r"Elongation $\, (\rm{b}) $"
+    xlabel=r"$ Q_{20} \, (\rm{b}) $"
+#    xlabel=r"Elongation $\, (\rm{b}) $"
     xcol=0
 print "\n The x-axis will show %s, %s " %(xaxis, xlabel)
 
 yaxis = raw_input("\n Which multipole moment would you like to plot on the y-axis? (Q20, Q22, Q30 [default]) \n")
 if yaxis in ['Q20', 'q20', 'q_20', 'Q_20']:
     yaxis="Q20"
-    ylabel=r"Elongation $\, (\rm{b}) $"
+    ylabel=r"$ Q_{20} \, (\rm{b}) $"
+#    ylabel=r"Elongation $\, (\rm{b}) $"
     ycol=0
 elif yaxis in ['Q22', 'q22', 'q_22', 'Q_22']:
     yaxis="Q22"
-    ylabel=r"Triaxiality $\, (\rm{b}) $"
-    ycol=1
+    ylabel=r"$ Q_{22} \, (\rm{b}) $"
+#    ylabel=r"Triaxiality $\, (\rm{b}) $"
+    ycol=2
 elif yaxis in ['Q30', 'q30', 'q_30', 'Q_30']:
     yaxis="Q30"
-    ylabel=r"Mass Asymmetry $\, (\rm{b}^\frac{3}{2}) $"
-    ycol=2
+    ylabel=r"$ Q_{30} \, (\rm{b}^\frac{3}{2}) $"
+#    ylabel=r"Mass Asymmetry $\, (\rm{b}^\frac{3}{2}) $"
+    ycol=1
 elif yaxis in ['Q40', 'q40', 'q_40', 'Q_40']:
     yaxis="Q40"
     ylabel=r"Neck $\, (\rm{b}^2) $"
@@ -112,24 +119,28 @@ elif yaxis in ['Q80', 'q80', 'q_80', 'Q_80']:
     ycol=7
 else:
     yaxis="Q30"
-    ylabel=r"Mass Asymmetry $\, (\rm{b}^\frac{3}{2}) $"
-    ycol=2
+    ylabel=r"$ Q_{30} \, (\rm{b}^\frac{3}{2}) $"
+#    ylabel=r"Mass Asymmetry $\, (\rm{b}^\frac{3}{2}) $"
+    ycol=1
 print "\n The y-axis will show %s, %s" %(yaxis, ylabel)
 
 
-zaxis = raw_input("\n What would you like to plot on the z-axis? (Energy, neck (qN), Q20, Q22, Q30 [default]) \n")
+zaxis = raw_input("\n What would you like to plot on the z-axis? (Energy [default], neck (qN), Q20, Q22, Q30) \n")
 if zaxis in ['Q20', 'q20', 'q_20', 'Q_20']:
     zaxis="Q20"
-    zlabel=r"Elongation $\, (\rm{b}) $"
+    zlabel=r"$ Q_{20} \, (\rm{b}) $"
+#    zlabel=r"Elongation $\, (\rm{b}) $"
     zcol=0
 elif zaxis in ['Q22', 'q22', 'q_22', 'Q_22']:
     zaxis="Q22"
-    zlabel=r"Triaxiality $\, (\rm{b}) $"
-    zcol=1
+    zlabel=r"$ Q_{22} \, (\rm{b}) $"
+#    zlabel=r"Triaxiality $\, (\rm{b}) $"
+    zcol=2
 elif zaxis in ['Q30', 'q30', 'q_30', 'Q_30']:
     zaxis="Q30"
-    zlabel=r"Mass Asymmetry $\, (\rm{b}^\frac{3}{2}) $"
-    zcol=2
+    zlabel=r"$ Q_{30} \, (\rm{b}^\frac{3}{2}) $"
+#    zlabel=r"Mass Asymmetry $\, (\rm{b}^\frac{3}{2}) $"
+    zcol=1
 elif zaxis in ['Q40', 'q40', 'q_40', 'Q_40']:
     zaxis="Q40"
     zlabel=r"Neck $\, (\rm{b}^2) $"
@@ -170,7 +181,7 @@ else:
     zaxis="Energy"
     zlabel=r"Energy $\, (\rm{MeV}) $"
     zcol=10
-print "\n The y-axis will show %s, %s" %(yaxis, ylabel)
+print "\n The z-axis will show %s, %s" %(zaxis, zlabel)
 
 dots = raw_input("\n Would you like to draw a dot at every single point from the original data set? This lets you see visually which grid points converged and which ones didn't. \n")
 
@@ -224,24 +235,24 @@ if pathway in ['y', 'Y', 'yes', 'Yes', 'YES']:
 
 
 # Set your origin E=0 to the point in your fission configuration with the minimum energy (hopefully it should be right around Q20=Q30=0)
-min_z0 = z0.min()
+min_z0 = -2080.263986 #z0.min() #0 #
 z0 = z0-min_z0
 if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
     z1 = z1-min_z0
 
-# Cut out those points which are just skewing the entire graph
-index = np.arange(len(z0))
-for i in index:
-    zval = z0[i]
-    if zval > (z0.min ()+cutofffission):
-        z0[i]=z0.min ()+cutofffission 
+### Cut out those points which are just skewing the entire graph
+##index = np.arange(len(z0))
+##for i in index:
+##    zval = z0[i]
+##    if zval > (z0.min ()+cutofffission):
+##        z0[i]=z0.min ()+cutofffission 
 
-if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
-    index = np.arange(len(z1))
-    for i in index:
-        zval = z1[i]
-        if zval > (z0.min ()+cutofffission):
-            z1[i]=z0.min ()+cutofffission 
+##if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
+##    index = np.arange(len(z1))
+##    for i in index:
+##        zval = z1[i]
+##        if zval > (z0.min ()+cutofffission):
+##            z1[i]=z0.min ()+cutofffission 
 
 
 #################################
@@ -254,7 +265,7 @@ if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
 #yi = y0
 xi = np.linspace (min (x0) , max (x0), num=200)
 yi = np.linspace (min (y0) , max (y0), num=200)
-#xi = np.linspace (0.0 , 345.0)
+#xi = np.linspace (0.0 , 175.0)
 #yi = np.linspace (-2.0 , 30.0)
 
 # interpolate data
@@ -277,7 +288,8 @@ else:
 
 
 Zplot[Zplot >= cutofffission-1.5] = np.nan             # Not sure about these two lines just yet
-Zplot[Zplot <= -1] = np.nan
+Zplot[Zplot <= -20] = -20 #np.nan
+#Zplot[Zplot <= -2] = -2 #np.nan
 
 maxZplot = np.nanmax (Zplot);
 minZplot = np.nanmin (Zplot);
@@ -300,7 +312,7 @@ ax.set_xlabel (xlabel , fontsize=20)
 ax.set_ylabel (ylabel , fontsize=20)
 
 # set ticks (min, max, step) gives: [min , min+step , ... , max-step]
-tab_range = np.arange (0.0, X0.max(), 100.0)
+tab_range = np.arange (0.0, X0.max(), 25.0)
 #tab_range = np.arange (0.0, 300.0, 100.0)
 ax.xaxis.set_ticks (tab_range)
 
@@ -337,7 +349,7 @@ if pathway in ['y', 'Y', 'yes', 'Yes', 'YES']:
 
 
 if description in ['y', 'Y', 'yes', 'Yes', 'YES']:
-    text(0.1, 0.9, desctext,
+    text(0.2, 0.9, desctext,
         horizontalalignment='center',
         verticalalignment='center',
         transform = ax.transAxes)

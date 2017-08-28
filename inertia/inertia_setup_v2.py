@@ -2,6 +2,7 @@ import numpy as np
 import os, subprocess, re, shutil
 import xml.etree.ElementTree as ET
 import errno, math
+from mpi4py import MPI
 
 # Specify the source directory, which is where your outputs, record files, and qp files are stored
 
@@ -29,11 +30,16 @@ nNeighbors = 2*num_constraints # Number of neighboring points used in the deriva
 dx = 0.001 # This is the amount your multipole constraints will change as you calculate nearby points to numerically compute the derivative of the density with respect to your multipole moments
 
 
+world_comm = MPI.COMM_WORLD
+world_rank = world_comm.rank
+world_size = world_comm.size
+
 # Read the XML file. Extract Q20 values and round to the nearest integer
 
 tree = ET.parse( xml_file )
 root = tree.getroot()
 points = root.findall("./PES/point")
+total_points = = len(points)
 
 global_prop = root.findall("./PES/Global")
 for prop in global_prop:
