@@ -11,9 +11,9 @@ import numpy as np
 import re, os, time
 
 lambda_spacing = 5
-q20_spacing = 
-q22_spacing = 
-q30_spacing = 
+q20_spacing = 6 
+q22_spacing = 3
+q30_spacing = 3
 temperature = 0.0
 
 #-------------------------------------------------#
@@ -52,20 +52,20 @@ def chooseCoeffs(myfile, file_over, file_under, spacing):
     ifexists_over  = os.path.isfile(file_over)
     ifexists_under = os.path.isfile(file_under)
     if ifexists_over and ifexists_under:
-        file1 = file_over
-        file2 = file_under
+        file1 = file_over + "\n"
+        file2 = file_under + "\n"
         coeff1 = 1./(2*spacing)
         coeff2 = 0.0
         coeff3 = -1./(2*spacing)
     elif ifexists_over and not ifexists_under:
-        file1 = file_over
+        file1 = file_over + "\n"
         file2 = myfile
         coeff1 = 1./(spacing)
         coeff2 = 0.0
         coeff3 = -1./(spacing)
     elif not ifexists_over and ifexists_under:
         file1 = myfile
-        file2 = file_under
+        file2 = file_under + "\n"
         coeff1 = 1./(spacing)
         coeff2 = 0.0
         coeff3 = -1./(spacing)
@@ -82,9 +82,10 @@ def chooseCoeffs(myfile, file_over, file_under, spacing):
 #---------------------------------------------#
 
 index = 1
+temperature = '{:010.5f}'.format(temperature)
 
 for myfile in allFiles:
-    mylambda, q20, q22, q30 = breakLine( line )
+    mylambda, q20, q22, q30 = breakLine( myfile )
 
     file_array = [myfile]
     coeff_array = []
@@ -138,21 +139,22 @@ for myfile in allFiles:
     coeff_array.append(coeff_line)
 
     # Write to file
-    fichier = 'qpmas-' + index + '.d'
-	inertia_file = open(fichier,'w')
+    fichier = 'qpmas-' + str(index) + '.d'
+    inertia_file = open(fichier,'w')
     for i in range(0,len(coeff_array)):
-        coeff1 = coeff_line[i][0]
-        coeff2 = coeff_line[i][1]
-        coeff3 = coeff_line[i][2]
-		newLine = str(coeff1).zfill(10) + str(coeff2).zfill(10) + str(coeff3).zfill(10)
-		inertia_file.write( "".join(word.center(1) for word in newLine) )
-		inertia_file.write('\n')
+        coeff1 = '{:010.5f}'.format(coeff_array[i][0])
+        coeff2 = '{:010.5f}'.format(coeff_array[i][1])
+        coeff3 = '{:010.5f}'.format(coeff_array[i][2])
+        newLine = str(coeff1).zfill(10) + '  ' + str(coeff2).zfill(10) + '  ' + str(coeff3).zfill(10)
+        inertia_file.write( "".join(word.center(1) for word in newLine) )
+        inertia_file.write('\n')
     for newLine in file_array:
-		inertia_file.write(newLine)
-		inertia_file.write('\n')
+        inertia_file.write(newLine)
+#       inertia_file.write('\n')
     newLine = str(temperature).zfill(10)
     inertia_file.write(newLine)
-	inertia_file.close()
+    inertia_file.write('\n')
+    inertia_file.close()
 
     index += 1
 
