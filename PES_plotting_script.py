@@ -167,11 +167,11 @@ elif zaxis in ['neck', 'qn', 'QN', 'qN']:
     zcol=11
 elif zaxis in ['deltaN', 'deltan', 'Deltan', 'DeltaN']:
     zaxis="deltaN"
-    zlabel=r"$\Delta_N\, (\rm{MeV}) $"
+    zlabel=r"$10\Delta_N\, (\rm{MeV}) $"
     zcol=12
 elif zaxis in ['deltaP', 'deltap', 'Deltap', 'DeltaP']:
     zaxis="deltaP"
-    zlabel=r"$\Delta_P\, (\rm{MeV}) $"
+    zlabel=r"$10\Delta_P\, (\rm{MeV}) $"
     zcol=13
 elif zaxis in ['zneck', 'zn', 'ZN', 'zN']:
     zaxis="zN"
@@ -204,7 +204,7 @@ print "\n The plot will be output to %s. \n" % outfile
 
 
 #################################
-##### Input the data
+##### Import the data
 #################################
 
 
@@ -227,6 +227,8 @@ if pathway in ['y', 'Y', 'yes', 'Yes', 'YES']:
     y2 = data[:,ycol]
     z2 = data[:,3]
 
+if zaxis in ['deltaN', 'deltan', 'Deltan', 'DeltaN', 'deltaP', 'deltap', 'Deltap', 'DeltaP']:
+    z0 = 10.0*z0
 
 
 #################################
@@ -235,7 +237,7 @@ if pathway in ['y', 'Y', 'yes', 'Yes', 'YES']:
 
 
 # Set your origin E=0 to the point in your fission configuration with the minimum energy (hopefully it should be right around Q20=Q30=0)
-min_z0 = -2080.263986 #z0.min() #0 #
+min_z0 = 0 #-2080.263986 #z0.min() #0 #
 z0 = z0-min_z0
 if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
     z1 = z1-min_z0

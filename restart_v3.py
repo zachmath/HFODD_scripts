@@ -34,7 +34,7 @@ fread.close()
 
 
 #-------------------------------------------------#
-#             Some useful modules                 #
+#             Some useful functions               #
 #-------------------------------------------------#
 
 def not_empty(chaine): return chaine != ''
