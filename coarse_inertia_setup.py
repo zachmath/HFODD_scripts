@@ -139,7 +139,7 @@ for myfile in allFiles:
     coeff_array.append(coeff_line)
 
     # Write to file
-    fichier = 'qpmas-' + str(index) + '.d'
+    fichier = 'qpmas-lambda' + str(mylambda) + '_' + str(q20).zfill(3) + str(q22).zfill(3) + str(q30).zfill(3) + '.d'
     inertia_file = open(fichier,'w')
     for i in range(0,len(coeff_array)):
         coeff1 = '{:010.5f}'.format(coeff_array[i][0])

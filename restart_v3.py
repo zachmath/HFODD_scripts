@@ -7,10 +7,6 @@ current_directory = os.getcwd()
 root_name = current_directory.rpartition('/')
 fichier_PES = root_name[2] + '_PES.xml'
 
-#q20_spacing = 4
-#q30_spacing = 2
-#rowMax = 75
-
 
 #-------------------------------------------------#
 #             Read in the XML data                #
@@ -94,9 +90,13 @@ numPoints = len(points)
 #            moments, etc., and write to hfodd_path.d            #
 #----------------------------------------------------------------#
 
-data_file = open('hfodd_path.d','w')
+data_file = open('hfodd_path_converged.d','w')
 
 data_file.write("%d %d \n" %(numConstraints+1, numPoints) ) # This doesn't seem to work if Q_10 is a constraint in your original file
+
+rec_file = open('move_recs.sh','w')
+out_file = open('move_outs.sh','w')
+qp_file  = open('move_qps.sh','w')
 
 lineCounter=0
 
@@ -116,6 +116,14 @@ for point in points:
         value = line.get('val')
         value = re.search('\D\d*\.\d*',value).group(0)
         values.append(value)
+        if qtype=="q30":
+            q30 = int(round(float(value),0))
+        elif qtype=="q20":
+            q20 = int(round(float(value),0))
+        elif qtype=="q22":
+            q22 = int(round(float(value),0))
+        else:
+            pass
 
     newLine = ['1 0    0.0  ']
 
@@ -129,39 +137,24 @@ for point in points:
 
                 newLine.append(addition)
 
-#-----------------------------------------------------------#
-# Implicit in these lines is the understanding that you     #
-#  are doing a PES in the Q20-Q30 plane                     #
-#-----------------------------------------------------------#
-
-                if (lam=='3') & (mu=='0'):
-                    q30 = int(round(float(values[i])))
-                elif lam=='2' and mu=='0':
-                    q20 = int(round(float(values[i])))
-                else:
-                    pass
-
 
     data_file.write( "".join(word.center(1) for word in newLine) )
     data_file.write('\n')
     lineCounter+=1
 
-#    archiveIndex = (q30 / q30_spacing) * rowMax + (q20 / q20_spacing + 1)
-    archiveIndex = str(q20).zfill(3) + str(q30).zfill(3)
+    archiveIndex = str(q20).zfill(3) + str(q22).zfill(3) + str(q30).zfill(3)
 
     oldRec = 'HFODD_' + oldindex.zfill(8) + '.REC'
-    restartRec = 'HFODD_' + str(lineCounter).zfill(8) + '.REC'
-    archiveRec = 'HFODD_' + str(int(archiveIndex)).zfill(8) + '.REC'
+    archiveRec = 'HFODD_' + str(int(archiveIndex)).zfill(9) + '.REC'
 
     oldOut = 'hfodd_' + oldindex.zfill(6) + '.out'
-    restartOut = 'hfodd_' + str(lineCounter).zfill(6) + '.out'
-    archiveOut = 'hfodd_' + str(int(archiveIndex)).zfill(6) + '.out'
+    archiveOut = 'hfodd_' + str(int(archiveIndex)).zfill(9) + '.out'
+
+    oldLocal = 'local_' + oldindex.zfill(6) + '.out'
+    archiveLocal = 'local_' + str(int(archiveIndex)).zfill(9) + '.out'
 
     oldQP = 'HFODD_' + oldindex.zfill(8) + '.QP'
-    restartQP = 'HFODD_' + str(lineCounter).zfill(8) + '.QP'
-    archiveQP = 'HFODD_' + str(int(archiveIndex)).zfill(8) + '.QP'
-
-    print oldRec, 'is being moved to', archiveRec
+    archiveQP = 'HFODD_' + str(int(archiveIndex)).zfill(9) + '.QP'
 
 #----------------------------------------------------------------#
 #        Rename the .REC files, which are currently indexed      #
@@ -169,11 +162,19 @@ for point in points:
 #                   new indices in hfodd_path.d                  #
 #----------------------------------------------------------------#
 
-#    os.system('cp rec/%s rec-archive/%s' %(oldRec, archiveRec))
-#    os.system('cp out/%s out-archive/%s' %(oldOut, archiveOut))
-#    os.system('cp qp/%s qp-archive/%s' %(oldQP, archiveQP))
-    os.system('cp rec/%s /usr/workspace/wsb/matheson/rprocess/294Og/rec-archive/%s' %(oldRec, archiveRec))
-    os.system('cp out/%s /usr/workspace/wsb/matheson/rprocess/294Og/out-archive/%s' %(oldOut, archiveOut))
-    os.system('cp qp/%s /usr/workspace/wsb/matheson/rprocess/294Og/qp-archive/%s' %(oldQP, archiveQP))
+    rec_file.write('hsi "cd 294Og/3D-lambda15/rec-archive/; cput rec/%s : %s"' %(oldRec, archiveRec))
+    rec_file.write('\n')
 
+    out_file.write('cp out/%s /usr/workspace/wsb/fission/294Og/3D-lambda15/out-archive/%s' %(oldOut, archiveOut))
+    out_file.write('\n')
+
+    out_file.write('hsi "cd 294Og/3D-lambda15/out-archive/; cput out/%s : %s"' %(oldOut, archiveOut))
+    out_file.write('\n')
+
+    qp_file.write('hsi "cd 294Og/3D-lambda15/qp-archive/; cput qp/%s : %s"' %(oldQP, archiveQP))
+    qp_file.write('\n')
+
+rec_file.close()
+out_file.close()
+qp_file.close()
 data_file.close()
