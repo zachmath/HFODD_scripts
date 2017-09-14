@@ -97,6 +97,7 @@ data_file.write("%d %d \n" %(numConstraints+1, numPoints) ) # This doesn't seem 
 rec_file = open('move_recs.sh','w')
 out_file = open('move_outs.sh','w')
 qp_file  = open('move_qps.sh','w')
+safety_file  = open('safety.txt','w')
 
 lineCounter=0
 
@@ -117,10 +118,13 @@ for point in points:
         value = re.search('\D\d*\.\d*',value).group(0)
         values.append(value)
         if qtype=="q30":
+            rawQ30 = float(value)
             q30 = int(round(float(value),0))
         elif qtype=="q20":
+            rawQ20 = float(value)
             q20 = int(round(float(value),0))
         elif qtype=="q22":
+            rawQ22 = float(value)
             q22 = int(round(float(value),0))
         else:
             pass
@@ -174,7 +178,11 @@ for point in points:
     qp_file.write('hsi "cd 294Og/3D-lambda15/qp-archive/; cput qp/%s : %s"' %(oldQP, archiveQP))
     qp_file.write('\n')
 
+    safety_file.write('%s with (q20,q22,q30)=( %f , %f , %f ) -> %s' %(oldOut, rawQ20, rawQ22, rawQ30, archiveOut))
+    safety_file.write('\n')
+
 rec_file.close()
 out_file.close()
 qp_file.close()
+safety_file.close()
 data_file.close()
