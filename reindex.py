@@ -49,7 +49,10 @@ numPoints = len(points)
 #            moments, etc., and write to hfodd_path.d            #
 #----------------------------------------------------------------#
 
-print_array = ['Old file is being moved to new file']
+#print_array = ['Old file is being moved to new file']
+qp_print_array = ['######']
+out_print_array = ['#####']
+rec_print_array = ['#####']
 
 for point in points:
 
@@ -92,11 +95,16 @@ for point in points:
     oldLoc = 'local_' + str(oldindex).zfill(9) + '.out'
     archiveLoc = 'local_' + str(int(archiveIndex)).zfill(9) + '.out-bak'
 
-    print oldQP, 'is being moved to', archiveQP
+#    print oldQP, 'is being moved to', archiveQP
 
-    row = oldQP + ' is being moved to ' + archiveQP
+    qpRow =  'mv    ' + oldQP  + '       ' + archiveQP
+    outRow = 'mv    ' + oldOut + '       ' + archiveOut
+    recRow = 'mv    ' + oldRec + '       ' + archiveRec
 
-    print_array = np.vstack (( print_array, row ))
+    qp_print_array = np.vstack (( qp_print_array, qpRow ))
+    out_print_array = np.vstack (( out_print_array, outRow ))
+    rec_print_array = np.vstack (( rec_print_array, recRow ))
+
 #----------------------------------------------------------------#
 #        Rename the .REC files, which are currently indexed      #
 #        according to hfodd_path_new.d, according to their       #
@@ -105,15 +113,29 @@ for point in points:
 
 #    os.system('mv rec-archive/%s rec-archive/%s' %(oldRec, archiveRec))
 #    os.system('hsi "cd 294Og/3D/rec-archive/; cput rec-archive/%s : %s"' %(oldRec, oldRec))
-    os.system('mv out-archive/%s out-archive/%s' %(oldOut, archiveOut))
+#    os.system('mv out-archive/%s out-archive/%s' %(oldOut, archiveOut))
 
 # To remove four characters from the end of the string use ${var%????}
-print_array = print_array.astype(str) # This converts the whole array back to the string, in case you decide you need it as float for some reason in between
+qp_print_array = qp_print_array.astype(str) # This converts the whole array back to the string, in case you decide you need it as float for some reason in between
+out_print_array = out_print_array.astype(str)
+rec_print_array = rec_print_array.astype(str)
 
-col_width = max(len(word) for row in print_array for word in row) + 1  # padding
+col_width = max(len(word) for row in qp_print_array for word in row) + 1  # padding
 
-data_file = open('post-reindex.out','w')
-for row in print_array:
+data_file = open('qp-reindex.sh','w')
+for row in qp_print_array:
+    data_file.write( "".join(word.center(col_width) for word in row) )
+    data_file.write('\n')
+data_file.close()
+
+data_file = open('out-reindex.sh','w')
+for row in out_print_array:
+    data_file.write( "".join(word.center(col_width) for word in row) )
+    data_file.write('\n')
+data_file.close()
+
+data_file = open('rec-reindex.sh','w')
+for row in rec_print_array:
     data_file.write( "".join(word.center(col_width) for word in row) )
     data_file.write('\n')
 data_file.close()

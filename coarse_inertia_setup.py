@@ -11,7 +11,7 @@ import numpy as np
 import re, os, time
 
 lambda_spacing = 5
-q20_spacing = 6 
+q20_spacing = 12 
 q22_spacing = 3
 q30_spacing = 3
 temperature = 0.0
@@ -45,7 +45,7 @@ def breakLine(element):
 
 def fileName(mylambda, q20, q22, q30):
     # Function goes here to make a filename, given a set of constraints
-    myname = 'lambda' + str(mylambda) + '_' + str(q20).zfill(3) + str(q22).zfill(3) + str(q30).zfill(3) + '.QP'
+    myname = 'lambda' + str(mylambda).zfill(2) + '_' + str(q20).zfill(3) + str(q22).zfill(3) + str(q30).zfill(3) + '.QP'
     return myname
 
 def chooseCoeffs(myfile, file_over, file_under, spacing):
@@ -139,7 +139,7 @@ for myfile in allFiles:
     coeff_array.append(coeff_line)
 
     # Write to file
-    fichier = 'qpmas-lambda' + str(mylambda) + '_' + str(q20).zfill(3) + str(q22).zfill(3) + str(q30).zfill(3) + '.d'
+    fichier = 'qpmas-lambda' + str(mylambda).zfill(2) + '_' + str(q20).zfill(3) + str(q22).zfill(3) + str(q30).zfill(3) + '.d'
     inertia_file = open(fichier,'w')
     for i in range(0,len(coeff_array)):
         coeff1 = '{:010.5f}'.format(coeff_array[i][0])
