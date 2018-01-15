@@ -10,4 +10,14 @@ sed -i "s/*  SPHERICAL SHAPE REQUESTED FOR THE SURFACE                          
 
 
 
+for file in 3D-lambda05/qp/*QP*; do newname=lambda05_$(echo ${file%????} | cut -d'_' -f2); mv $file $newname; done
+
 while read -r line; do let prev=$line+1; oldfile=$(printf "HFODD_%08d.REC" $prev); newfile=$(printf "HFODD_%08d.REC" $line); cp restart/$oldfile restart/$newfile; echo "cp restart/$oldfile restart/$newfile"; done < test.out
+
+
+
+ls qpmas-lambda05*d >> l05-inertia.pbs
+# Copy the list so each entry appears twice in the same line
+sed -i "s/qpmas/srun -N 1 -n 9 -c \$OMP_NUM_THREADS \$EXECUTABLE 4 qpmas/" l05-inertia.pbs
+sed -i "s/\.dqpmas/\.d >\& qpmas/" l05-inertia.pbs
+sed -i '0~58 s/$/\nwait/g' l05-inertia.pbs

@@ -1,0 +1,151 @@
+#!/bin/bash
+
+#MSUB -A nucfiss
+#MSUB -q pbatch
+#MSUB -o sierra_batch.out
+#MSUB -e sierra_batch.err
+#MSUB -l partition=sierra
+#MSUB -l gres=lscratche
+#MSUB -l walltime=10:00:00
+#MSUB -l nodes=27
+#MSUB -l ttc=324
+#MSUB -m ae
+#MSUB -N 176Pt-fission-RUN_5
+#cd $PBS_O_WORKDIR
+
+# Setting environment variables
+export PAT_RT_HWPC=0
+export OMP_NUM_THREADS=4
+export KMP_STACKSIZE=1024000000
+ulimit -s unlimited
+
+# Customization of names and places
+EXECUTABLE='./hf268f'
+SCRATCH_DIR='/p/lscratche/matheson/176Pt-fission/RUN_5'
+
+OUTPUT=$EXECUTABLE'.txt'
+RESTART_DIR=$SCRATCH_DIR'/restart/'
+RECORD_DIR=$SCRATCH_DIR'/rec/'
+REVIEW_DIR=$SCRATCH_DIR'/rev/'
+OUTPUT_DIR=$SCRATCH_DIR'/out/'
+SUMMARY_DIR=$SCRATCH_DIR'/summary/'
+DENSITY_DIR=$SCRATCH_DIR'/densities/'
+QP_DIR=$SCRATCH_DIR'/qp/'
+LIC_DIR=$SCRATCH_DIR'/lic/'
+
+if [ ! -d "$SCRATCH_DIR" ]; then
+    echo "Creating directory" $SCRATCH_DIR
+    mkdir $SCRATCH_DIR
+fi
+
+#cp $HOME/Development/sandbox/HFODD/divers/masses/* $SCRATCH_DIR
+#cp ./hfodd_files.d $SCRATCH_DIR
+#cp ./hfodd_path*.d $SCRATCH_DIR
+#cp ./hfodd.d $SCRATCH_DIR/hfodd.d
+#cp ./hfodd_mpiio.d $SCRATCH_DIR/hfodd_mpiio.d
+#cp $EXECUTABLE $SCRATCH_DIR
+
+if [ ! -d "$DENSITY_DIR" ]; then
+    echo "Creating directory", $DENSITY_DIR
+    mkdir $DENSITY_DIR
+fi
+if [ ! -d "$QP_DIR" ]; then
+    echo "Creating directory", $QP_DIR
+    mkdir $QP_DIR
+fi
+if [ ! -d "$RESTART_DIR" ]; then
+    echo "Creating directory", $RESTART_DIR
+    mkdir $RESTART_DIR
+fi
+if [ ! -d "$RECORD_DIR" ]; then
+    echo "Creating directory" $RECORD_DIR
+    mkdir $RECORD_DIR
+fi
+if [ ! -d "$REVIEW_DIR" ]; then
+    echo "Creating directory" $REVIEW_DIR
+    mkdir $REVIEW_DIR
+fi
+if [ ! -d "$OUTPUT_DIR" ]; then
+    echo "Creating directory" $OUTPUT_DIR
+    mkdir $OUTPUT_DIR
+fi
+if [ ! -d "$SUMMARY_DIR" ]; then
+    echo "Creating directory" $SUMMARY_DIR
+    mkdir $SUMMARY_DIR
+fi
+if [ ! -d "$LIC_DIR" ]; then
+    echo "Creating directory" $LIC_DIR
+    mkdir $LIC_DIR
+fi
+
+#Running the job
+cd $SCRATCH_DIR
+date > time.txt
+srun -n 81 --ntasks-per-node=3 -c $OMP_NUM_THREADS $EXECUTABLE < /dev/null >& $OUTPUT
+date >> time.txt
+
+# Moving all output files to a separate base directory
+
+liste_out=`find $SCRATCH_DIR -maxdepth 1 -name '*.out'`
+for file in $liste_out
+do
+    mv $file $OUTPUT_DIR
+done
+liste_dat=`find $SCRATCH_DIR -maxdepth 1 -name 'f*.dat'`
+for file in $liste_dat
+do
+    mv $file $DENSITY_DIR
+done
+liste_qp=`find $SCRATCH_DIR -maxdepth 1 -name '*.QP'`
+for file in $liste_qp
+do
+    mv $file $QP_DIR
+done
+liste_rev=`find $SCRATCH_DIR -maxdepth 1 -name '*.REV'`
+for file in $liste_rev
+do
+    mv $file $REVIEW_DIR
+done
+liste_lic=`find $SCRATCH_DIR -maxdepth 1 -name '*.LIC'`
+for file in $liste_lic
+do
+    mv $file $LIC_DIR
+done
+
+mv m* p* h* $SUMMARY_DIR
+
+# Stitch the individual batches back together in the parent folder
+
+tasks_per_batch=81
+
+folder_index=$(echo $SCRATCH_DIR | cut -d'_' -f2)
+file_index=1
+last_file=$(ls $RESTART_DIR | wc -l)
+
+while [ $file_index -le $last_file ]; do
+
+       new_index=$(bc <<< "($folder_index * $tasks_per_batch) + $file_index")
+
+       printf -v new_index6 "%06d" $new_index
+
+#       mv $OUTPUT_DIR/hfodd_0*000$file_index.out $SCRATCH_DIR/../out/hfodd_$new_index6.out
+       cp $OUTPUT_DIR/hfodd_0*000$file_index.out $SCRATCH_DIR/../out/hfodd_$new_index6.out
+
+       printf -v new_index8 "%08d" $new_index
+
+#       mv $RECORD_DIR/HFODD_0*000$file_index.REC $SCRATCH_DIR/../rec/HFODD_$new_index8.REC
+       cp $RECORD_DIR/HFODD_0*000$file_index.REC $SCRATCH_DIR/../rec/HFODD_$new_index8.REC
+#       mv $LIC_DIR/HFODD_0*000$file_index.LIC $SCRATCH_DIR/../lic/HFODD_$new_index8.LIC
+       cp $LIC_DIR/HFODD_0*000$file_index.LIC $SCRATCH_DIR/../lic/HFODD_$new_index8.LIC
+#       mv $QP_DIR/HFODD_0*000$file_index.QP $SCRATCH_DIR/../qp/HFODD_$new_index8.QP
+       cp $QP_DIR/HFODD_0*000$file_index.QP $SCRATCH_DIR/../qp/HFODD_$new_index8.QP
+
+       let file_index+=1
+done
+
+# Clean up
+
+#rm *.py *.out toto
+rm -rf rev
+rm -rf $DENSITY_DIR
+
