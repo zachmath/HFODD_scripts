@@ -116,8 +116,8 @@ ax = fig.add_subplot (111)
 
 
 # set labels
-ax.set_xlabel (r"$ x (\rm{b}) $" , fontsize=20)
-ax.set_ylabel (r"$ y (\rm{b}) $" , fontsize=20)
+ax.set_xlabel (r"$ x (\rm{fm}) $" , fontsize=20)
+ax.set_ylabel (r"$ y (\rm{fm}) $" , fontsize=20)
 
 # set ticks (min, max, step) gives: [min , min+step , ... , max-step]
 rangemax = max(round(X0.max()),round(Y0.max()))
@@ -267,8 +267,8 @@ ax = fig.add_subplot (111)
 
 
 # set labels
-ax.set_xlabel (r"$ x (\rm{b}) $" , fontsize=20)
-ax.set_ylabel (r"$ y (\rm{b}) $" , fontsize=20)
+ax.set_xlabel (r"$ x (\rm{fm}) $" , fontsize=20)
+ax.set_ylabel (r"$ y (\rm{fm}) $" , fontsize=20)
 
 # set ticks (min, max, step) gives: [min , min+step , ... , max-step]
 ax.xaxis.set_ticks (tab_range)
