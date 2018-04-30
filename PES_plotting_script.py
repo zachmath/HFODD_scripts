@@ -76,8 +76,8 @@ elif xaxis in ['Q80', 'q80', 'q_80', 'Q_80']:
     xcol=7
 else:
     xaxis="Q20"
-    xlabel=r"$ Q_{20} \, (\rm{b}) $"
-#    xlabel=r"Elongation $\, (\rm{b}) $"
+#    xlabel=r"$ Q_{20} \, (\rm{b}) $"
+    xlabel=r"Elongation $\, (\rm{b}) $"
     xcol=0
 print "\n The x-axis will show %s, %s " %(xaxis, xlabel)
 
@@ -119,8 +119,8 @@ elif yaxis in ['Q80', 'q80', 'q_80', 'Q_80']:
     ycol=7
 else:
     yaxis="Q30"
-    ylabel=r"$ Q_{30} \, (\rm{b}^\frac{3}{2}) $"
-#    ylabel=r"Mass Asymmetry $\, (\rm{b}^\frac{3}{2}) $"
+#    ylabel=r"$ Q_{30} \, (\rm{b}^\frac{3}{2}) $"
+    ylabel=r"Mass Asymmetry $\, (\rm{b}^\frac{3}{2}) $"
     ycol=1
 print "\n The y-axis will show %s, %s" %(yaxis, ylabel)
 
@@ -173,10 +173,18 @@ elif zaxis in ['deltaP', 'deltap', 'Deltap', 'DeltaP']:
     zaxis="deltaP"
     zlabel=r"$10\Delta_P\, (\rm{MeV}) $"
     zcol=13
+elif zaxis in ['epairN', 'epairn', 'Epairn', 'EpairN']:
+    zaxis="EpairN"
+    zlabel=r"$E_{pair}^N\, (\rm{MeV}) $"
+    zcol=14
+elif zaxis in ['epairP', 'epairp', 'Epairp', 'EpairP']:
+    zaxis="EpairP"
+    zlabel=r"$E_{pair}^P\, (\rm{MeV}) $"
+    zcol=15
 elif zaxis in ['zneck', 'zn', 'ZN', 'zN']:
     zaxis="zN"
     zlabel=r"Protons in Neck $\, (\rm{Z_N}) $"
-    zcol=14
+    zcol=16
 else:
     zaxis="Energy"
     zlabel=r"Energy $\, (\rm{MeV}) $"
@@ -225,11 +233,23 @@ if pathway in ['y', 'Y', 'yes', 'Yes', 'YES']:
     data = np.genfromtxt (pathfile)
     x2 = data[:,xcol]
     y2 = data[:,ycol]
-    z2 = data[:,3]
+#    z2 = data[:,2]
 
 if zaxis in ['deltaN', 'deltan', 'Deltan', 'DeltaN', 'deltaP', 'deltap', 'Deltap', 'DeltaP']:
     z0 = 10.0*z0
 
+# Uncomment these lines if you only want to look at a small section of the PES
+x0max = 175
+xyz0 = zip(x0,y0,z0)
+xyz0 = [xyz for xyz in xyz0 if xyz[0]<x0max]
+y0max = 50
+xyz0 = [xyz for xyz in xyz0 if xyz[1]<y0max]
+x0min = 0
+xyz0 = [xyz for xyz in xyz0 if xyz[0]>x0min]
+
+x0 = [item[0] for item in xyz0]
+y0 = [item[1] for item in xyz0]
+z0 = [item[2] for item in xyz0]
 
 #################################
 ##### Adjust your energy scale to set E=0 at or around Q20=Q30=0
@@ -237,10 +257,11 @@ if zaxis in ['deltaN', 'deltan', 'Deltan', 'DeltaN', 'deltaP', 'deltap', 'Deltap
 
 
 # Set your origin E=0 to the point in your fission configuration with the minimum energy (hopefully it should be right around Q20=Q30=0)
-min_z0 = 0 #-2080.263986 #z0.min() #0 #
-z0 = z0-min_z0
+min_z0 = -2080.263986 #z0.min() #0 #
+z0 = [z - min_z0 for z in z0]
+#z0 = z0-min_z0
 if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
-    z1 = z1-min_z0
+    z1 = [z - min_z0 for z in z1]
 
 ### Cut out those points which are just skewing the entire graph
 ##index = np.arange(len(z0))
@@ -288,10 +309,9 @@ if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
 else:
     Zplot = Z0
 
-
 Zplot[Zplot >= cutofffission-1.5] = np.nan             # Not sure about these two lines just yet
-Zplot[Zplot <= -20] = -20 #np.nan
-#Zplot[Zplot <= -2] = -2 #np.nan
+#Zplot[Zplot <= -20] = -20 #np.nan
+Zplot[Zplot <= -2] = -2 #np.nan
 
 maxZplot = np.nanmax (Zplot);
 minZplot = np.nanmin (Zplot);
@@ -314,7 +334,7 @@ ax.set_xlabel (xlabel , fontsize=20)
 ax.set_ylabel (ylabel , fontsize=20)
 
 # set ticks (min, max, step) gives: [min , min+step , ... , max-step]
-tab_range = np.arange (0.0, X0.max(), 25.0)
+tab_range = np.arange (0.0, X0.max(), 50.0)
 #tab_range = np.arange (0.0, 300.0, 100.0)
 ax.xaxis.set_ticks (tab_range)
 
@@ -335,7 +355,8 @@ plt.clabel(CS1, inline=1, fontsize=10, colors='k')
 if dots in ['n', 'N', 'no', 'No', 'NO']:
     pass
 else:
-    plot (x0, y0, 'k.')
+    CS2 = plt.scatter (x0 , y0 , c=z0 , vmin=minZplot , vmax=maxZplot, cmap=plt.cm.jet)
+    #plot (x0, y0, 'k.')
     if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
         plot (x1, y1, 'g.')
 
@@ -374,6 +395,7 @@ cbar_ax = fig.add_axes ([0.9 , 0.1 , 0.04 , 0.8])
 step = 5
 decimal_number = 0#-1
 v = np.linspace (0 , cutofffission, step , endpoint=True).tolist ()
+#v = np.linspace (0 , cutofffission, step , endpoint=True).tolist ()
 #v = np.linspace (round (minZplot , decimal_number) , round (maxZplot + (maxZplot-minZplot)/step , decimal_number) , step , endpoint=True).tolist ()
 v = [round (elem , decimal_number) for elem in v] # warning, these are positions of ticks, the "round" function can lead to irregular spacings
 
