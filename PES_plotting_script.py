@@ -185,6 +185,14 @@ elif zaxis in ['zneck', 'zn', 'ZN', 'zN']:
     zaxis="zN"
     zlabel=r"Protons in Neck $\, (\rm{Z_N}) $"
     zcol=16
+elif zaxis in ['Z1', 'z1']:
+    zaxis="Z1"
+    zlabel="Charge of fragment 1"
+    zcol=17
+elif zaxis in ['A1', 'a1']:
+    zaxis="A1"
+    zlabel="Mass of fragment 1"
+    zcol=18
 else:
     zaxis="Energy"
     zlabel=r"Energy $\, (\rm{MeV}) $"
@@ -238,18 +246,18 @@ if pathway in ['y', 'Y', 'yes', 'Yes', 'YES']:
 if zaxis in ['deltaN', 'deltan', 'Deltan', 'DeltaN', 'deltaP', 'deltap', 'Deltap', 'DeltaP']:
     z0 = 10.0*z0
 
-# Uncomment these lines if you only want to look at a small section of the PES
-x0max = 175
-xyz0 = zip(x0,y0,z0)
-xyz0 = [xyz for xyz in xyz0 if xyz[0]<x0max]
-y0max = 50
-xyz0 = [xyz for xyz in xyz0 if xyz[1]<y0max]
-x0min = 0
-xyz0 = [xyz for xyz in xyz0 if xyz[0]>x0min]
-
-x0 = [item[0] for item in xyz0]
-y0 = [item[1] for item in xyz0]
-z0 = [item[2] for item in xyz0]
+## Uncomment these lines if you only want to look at a small section of the PES
+#x0max = 175
+#xyz0 = zip(x0,y0,z0)
+#xyz0 = [xyz for xyz in xyz0 if xyz[0]<x0max]
+#y0max = 50
+#xyz0 = [xyz for xyz in xyz0 if xyz[1]<y0max]
+#x0min = 0
+#xyz0 = [xyz for xyz in xyz0 if xyz[0]>x0min]
+#
+#x0 = [item[0] for item in xyz0]
+#y0 = [item[1] for item in xyz0]
+#z0 = [item[2] for item in xyz0]
 
 #################################
 ##### Adjust your energy scale to set E=0 at or around Q20=Q30=0
@@ -257,7 +265,7 @@ z0 = [item[2] for item in xyz0]
 
 
 # Set your origin E=0 to the point in your fission configuration with the minimum energy (hopefully it should be right around Q20=Q30=0)
-min_z0 = -2080.263986 #z0.min() #0 #
+min_z0 = z0.min() #-2080.263986 #z0.min() #0 #
 z0 = [z - min_z0 for z in z0]
 #z0 = z0-min_z0
 if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
@@ -356,7 +364,7 @@ if dots in ['n', 'N', 'no', 'No', 'NO']:
     pass
 else:
     CS2 = plt.scatter (x0 , y0 , c=z0 , vmin=minZplot , vmax=maxZplot, cmap=plt.cm.jet)
-    #plot (x0, y0, 'k.')
+#    plot (x0, y0, 'k.')
     if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
         plot (x1, y1, 'g.')
 
