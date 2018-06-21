@@ -29,7 +29,7 @@ c-------reading density-----------------------
         do ix=1,n 
 c-----change the position of dpro for neutron or proton-----
 !-----The file is ordered: x, y, z, dneu, dpro, dtot (although this may be HFODD-version dependent, I'm afraid)
-         read(7,*)xx(ix),yy(iy),zz(iz),dpro(ix,iy,iz),d1,den(ix,iy,iz)
+         read(7,*)xx(ix),yy(iy),zz(iz),d1,dpro(ix,iy,iz),den(ix,iy,iz)
         enddo
        enddo
       enddo
@@ -77,7 +77,8 @@ c----locating the maxima along z----------
       do i=2,1000
        if(valk(i)-valk(i-1).gt.0.0d0.and.valk(i)-valk(i+1).gt.0.0d0)
      1 then
-        if(zk(i).lt.0.0d0)p1in=zk(i)
+!        if(zk(i).lt.0.0d0)p1in=zk(i)
+        if(zk(i).lt.-5.0d0)p1in=zk(i)
 c---13.0 is used manually to avoid wrong maxima---this value may be
 c---different for different inputs--------
         if(zk(i).gt.0.0d0.and.zk(i).lt.13.0d0)p2in=zk(i)

@@ -1,0 +1,7 @@
+# Various kinds of output files
+*out
+*REC
+*QP
+*.d
+*.out.new
+

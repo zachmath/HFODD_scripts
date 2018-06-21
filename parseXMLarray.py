@@ -1,3 +1,8 @@
+#
+# For this to work with the new XML files, you'll have to find-replace 
+# the 'energies' corresponding to pairing with something else, like 'penergies'
+#
+
 import xml.etree.ElementTree as ET
 import numpy as np
 import re, os
@@ -6,7 +11,7 @@ import re, os
 #               Read in the data                  #
 #-------------------------------------------------#
 
-infile = raw_input("\n Please list the name of the xml file: \n")
+infile = '290Fm_PES.xml'#raw_input("\n Please list the name of the xml file: \n")
 
 tree = ET.parse( infile )
 #tree = ET.parse('pu240_mesh2D_q20q30_NEWinertia_borderNorth1_SKMS_T0.00_PES.xml')
@@ -27,6 +32,9 @@ print_array = []
 
 for line in root[0][1].iter('constraint'):
     print_array.append( line.get('type') )
+
+for line in root[0][1].iter('obs'):
+    print_array.append( line.get('name') )
 
 print_array.append( 'EHFB' )
 
@@ -58,11 +66,15 @@ for point in points:
         value = re.search('\D\d*\.\d*',value).group(0)
         constraints.append(value)
 
+    for line in point.iter('obs'):
+        value = line.get('val')
+        value = re.search('\D\d*\.\d*',value).group(0)
+        constraints.append(value)
+
     energy = 0
     for line in point.iter('energies'):
         EHFB = line.get('EHFB')
         energy = re.search('\D\d*\.\d*',EHFB).group(0)
-#        print energy
 
     for line in point.iter('neck'):
         neck = line.get('qN')
@@ -72,7 +84,7 @@ for point in points:
         neck = line.get('zN')
         zN = re.search('\D\d*\.\d*',neck).group(0)
 
-    for line in point.iter('pairing'):
+    for line in point.iter('gaps'):
         dN = line.get('deltaN')
         deltaN = re.search('\D\d*\.\d*[de][+-]\d*',dN).group(0)
         dP = line.get('deltaP')
