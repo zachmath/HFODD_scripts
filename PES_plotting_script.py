@@ -7,7 +7,8 @@ from matplotlib import rc
 matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 # to have ascii hyphen minus signs (shorter than the official unicode)
 matplotlib.rcParams['text.latex.unicode']=False
-matplotlib.rc ('font',**{'family':'serif','serif':['Times'] , 'size':20})
+matplotlib.rc ('font',**{'family':'serif','serif':['Times New Roman'] , 'size':30})
+matplotlib.rc ('text', usetex=True)
 
 from matplotlib.pyplot import figure , axes , plot , xlabel , ylabel , title , grid , savefig , show
 import numpy as np
@@ -76,8 +77,8 @@ elif xaxis in ['Q80', 'q80', 'q_80', 'Q_80']:
     xcol=7
 else:
     xaxis="Q20"
-#    xlabel=r"$ Q_{20} \, (\rm{b}) $"
-    xlabel=r"Elongation $\, (\rm{b}) $"
+    xlabel=r"$ Q_{20} \, (\rm{b}) $"
+#    xlabel=r"Elongation $\, (\rm{b}) $"
     xcol=0
 print "\n The x-axis will show %s, %s " %(xaxis, xlabel)
 
@@ -119,8 +120,8 @@ elif yaxis in ['Q80', 'q80', 'q_80', 'Q_80']:
     ycol=7
 else:
     yaxis="Q30"
-#    ylabel=r"$ Q_{30} \, (\rm{b}^\frac{3}{2}) $"
-    ylabel=r"Mass Asymmetry $\, (\rm{b}^\frac{3}{2}) $"
+    ylabel=r"$ Q_{30} \, (\rm{b}^\frac{3}{2}) $"
+#    ylabel=r"Mass Asymmetry $\, (\rm{b}^\frac{3}{2}) $"
     ycol=1
 print "\n The y-axis will show %s, %s" %(yaxis, ylabel)
 
@@ -265,7 +266,7 @@ if zaxis in ['deltaN', 'deltan', 'Deltan', 'DeltaN', 'deltaP', 'deltap', 'Deltap
 
 
 # Set your origin E=0 to the point in your fission configuration with the minimum energy (hopefully it should be right around Q20=Q30=0)
-min_z0 = z0.min() #-2080.263986 #z0.min() #0 #
+min_z0 = -2080.263986 #z0.min() #0 #
 z0 = [z - min_z0 for z in z0]
 #z0 = z0-min_z0
 if lvlcross in ['y', 'Y', 'yes', 'Yes', 'YES']:
@@ -332,14 +333,14 @@ minZplot = np.nanmin (Zplot);
 
 # APS required dpi, figsize can change
 #fig = plt.figure (figsize = (8.0 , 3.0) , dpi = 1200)
-fig = plt.figure (figsize = (14 , 6.5) , dpi = 1200)
+fig = plt.figure (figsize = (14 , 7) , dpi = 1200)
 
 # add a plot on the figure
 ax = fig.add_subplot (111)
 
 # set labels
-ax.set_xlabel (xlabel , fontsize=20)
-ax.set_ylabel (ylabel , fontsize=20)
+ax.set_xlabel (xlabel , fontsize=30)
+ax.set_ylabel (ylabel , fontsize=30)
 
 # set ticks (min, max, step) gives: [min , min+step , ... , max-step]
 tab_range = np.arange (0.0, X0.max(), 50.0)
@@ -357,7 +358,7 @@ CS0 = plt.contourf (X0 , Y0 , Zplot , 25 , origin=origin , vmin=minZplot , vmax=
 
 # This overlays nice 'altitude' labels on top of your contour plot (Behind the scenes, what it's really doing is drawing and labelling individual contour lines, but you can't see them since they're the same color as the gradient)
 CS1 = plt.contour (X0 , Y0 , Zplot , 5 , origin=origin , vmin=minZplot , vmax=maxZplot, cmap=plt.cm.jet)
-plt.clabel(CS1, inline=1, fontsize=10, colors='k')
+plt.clabel(CS1, inline=1, fontsize=20, colors='k')
 
 # This draws a dot at every single point from the original data set, before they are used to make the interpolated contour. It lets you see visually which grid points converged and which ones didn't.
 if dots in ['n', 'N', 'no', 'No', 'NO']:
@@ -410,7 +411,7 @@ v = [round (elem , decimal_number) for elem in v] # warning, these are positions
 
 # plot the colorbar
 cb = plt.colorbar (CS0 , cax=cbar_ax , ticks=v , norm=matplotlib.colors.Normalize (vmin=minZplot , vmax=maxZplot))
-cb.set_label(zlabel , fontsize=20, rotation=270, labelpad=20)
+cb.set_label(zlabel , fontsize=30, rotation=270, labelpad=20)
 #cb.set_label(r"Energy $\, (\rm{MeV}) $" , fontsize=20, rotation=270, labelpad=20)
 
 # to get scientific notation (conflict with APS font)
@@ -434,7 +435,7 @@ cb.ax.get_yaxis ().get_offset_text ().set_visible (False)
 
 # to call external LaTeX libraries for dealing with latex command not included in python
 # will produce conflicts if called before
-matplotlib.rc ('text', usetex=True)
+#matplotlib.rc ('text', usetex=True)
 
 
 # to add some text on the graph
