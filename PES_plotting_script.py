@@ -356,6 +356,10 @@ origin = 'lower'
 # This gives you your attractive color gradient contour
 CS0 = plt.contourf (X0 , Y0 , Zplot , 25 , origin=origin , vmin=minZplot , vmax=maxZplot, cmap=plt.cm.jet)
 
+# This should prevent aliasing in the pdf (white lines appearing along the countours)
+for c in CS0.collections:
+    c.set_edgecolor("face")
+
 # This overlays nice 'altitude' labels on top of your contour plot (Behind the scenes, what it's really doing is drawing and labelling individual contour lines, but you can't see them since they're the same color as the gradient)
 CS1 = plt.contour (X0 , Y0 , Zplot , 5 , origin=origin , vmin=minZplot , vmax=maxZplot, cmap=plt.cm.jet)
 plt.clabel(CS1, inline=1, fontsize=20, colors='k')
