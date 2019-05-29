@@ -7,9 +7,9 @@ current_directory = os.getcwd()
 root_name = current_directory.rpartition('/')
 fichier_PES = root_name[2] + '_PES.xml'
 
-q20_spacing = 2
-q30_spacing = 2
-rowMax = 75
+#q20_spacing = 2
+#q30_spacing = 2
+#rowMax = 75
 
 
 #-------------------------------------------------#

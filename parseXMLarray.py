@@ -11,7 +11,7 @@ import re, os
 #               Read in the data                  #
 #-------------------------------------------------#
 
-infile = '290Fm_PES.xml'#raw_input("\n Please list the name of the xml file: \n")
+infile = 'old_xml/Q30_PES.xml'#raw_input("\n Please list the name of the xml file: \n")
 
 tree = ET.parse( infile )
 #tree = ET.parse('pu240_mesh2D_q20q30_NEWinertia_borderNorth1_SKMS_T0.00_PES.xml')
@@ -44,7 +44,15 @@ print_array.append( 'deltaN' )
 
 print_array.append( 'deltaP' )
 
+print_array.append( 'EpairN' )
+
+print_array.append( 'EpairP' )
+
 print_array.append( 'zN' )
+
+print_array.append( 'Z1' )
+
+print_array.append( 'A1' )
 
 #-------------------------------------------------#
 # Next you should form an array(?) of all the points as independent trees #
@@ -73,6 +81,7 @@ for point in points:
 
     energy = 0
     for line in point.iter('energies'):
+#    for line in point.iter('pairing/energies'): # Oh, but this is the term you DON'T want
         EHFB = line.get('EHFB')
         energy = re.search('\D\d*\.\d*',EHFB).group(0)
 
@@ -90,7 +99,19 @@ for point in points:
         dP = line.get('deltaP')
         deltaP = re.search('\D\d*\.\d*[de][+-]\d*',dP).group(0)
 
-    row = constraints + [energy] + [qN] + [deltaN] + [deltaP] + [zN] # + [something else]
+    for line in point.iter('penergies'):
+        EpN = line.get('EpairN')
+        EpairN = re.search('\D\d*\.\d*[de][+-]\d*',EpN).group(0)
+        EpP = line.get('EpairP')
+        EpairP = re.search('\D\d*\.\d*[de][+-]\d*',EpP).group(0)
+
+    for line in point.iter('identity'):
+        z1 = line.get('Z1')
+        Z1 = re.search('\D\d*\.\d*',z1).group(0)
+        a1 = line.get('A1')
+        A1 = re.search('\D\d*\.\d*',a1).group(0)
+
+    row = constraints + [energy] + [qN] + [deltaN] + [deltaP] + [EpairN] + [EpairP] + [zN] + [Z1] + [A1] # + [something else]
 
     print_array = np.vstack (( print_array, row ))
 
